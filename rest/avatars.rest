@@ -1,6 +1,14 @@
-@local=http://localhost:3030
+@local=http://localhost:8000
 
-@uat=
+@uat=https://diogenes-pwhb.koyeb.app
+
+@prefix=api/v1
+
+@collections=avatars
+
 
 ###
-GET {{local}}/avatars
+GET {{local}}/{{prefix}}/{{collections}}
+
+###
+GET {{uat}}

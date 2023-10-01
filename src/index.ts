@@ -1,12 +1,16 @@
 import { Elysia } from "elysia";
 import avatarRouter from "./routes/avatars";
 import indexRouter from "./routes";
+import roleRouter from "./routes/roles";
 
 const port = process.env.PORT || 3000;
 
 const app = new Elysia()
   .use(indexRouter)
-  .use(avatarRouter)
+  .group("/api/v1", app => app
+    .use(avatarRouter)
+    .use(roleRouter)
+  )
   .listen(port);
 
 console.log(

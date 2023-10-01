@@ -1,6 +1,6 @@
 @local=http://localhost:8000
 
-@uat=https://diogenes-pwhb.koyeb.app
+@uat=https://diogenes-pwhb.koyeb.app/
 
 ###
 GET {{local}}/
