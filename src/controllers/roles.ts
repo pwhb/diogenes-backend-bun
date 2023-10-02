@@ -27,13 +27,14 @@ export const createOne: Handler = async (context) =>
         });
 
         context.set.status = 201;
-        
+
         return {
             data: dbRes
         };
     } catch (error)
     {
         console.error(error);
+        context.set.status = 500;
         return {
             error: error
         };
@@ -55,6 +56,7 @@ export const getOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}
         } catch (error)
         {
             console.error(error);
+            context.set.status = 500;
             return {
                 error: error
             };
@@ -65,9 +67,14 @@ export const getMany: Handler = async (context) =>
 {
     try
     {
+        let { limit, page } = context.query as any;
+
+        limit = parseInt(limit) || 20;
+        page = parseInt(page) || 0;
+
         const client = await clientPromise;
         const col = client.db(dbName).collection(collectionName);
-        const docs = await col.find().toArray();
+        const docs = await col.find({}, { skip: limit * page, limit: limit, sort: { createdAt: -1 } }).toArray();
         const total = await col.countDocuments();
 
         return {
@@ -77,6 +84,7 @@ export const getMany: Handler = async (context) =>
     } catch (error)
     {
         console.error(error);
+        context.set.status = 500;
         return {
             error: error
         };
@@ -107,6 +115,7 @@ export const updateOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>,
     } catch (error)
     {
         console.error(error);
+        context.set.status = 500;
         return {
             error: error
         };
@@ -136,6 +145,7 @@ export const replaceOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>
     } catch (error)
     {
         console.error(error);
+        context.set.status = 500;
         return {
             error: error
         };
@@ -156,6 +166,7 @@ export const deleteOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>,
     } catch (error)
     {
         console.error(error);
+        context.set.status = 500;
         return {
             error: error
         };

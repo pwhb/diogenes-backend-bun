@@ -4,7 +4,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "bun run --watch src/index.ts",
-    "start": "bun src/index.ts"
+    "start": "bun src/index.ts",
+    "add": "bun scripts/generate.ts",
+    "delete": "bun scripts/delete.ts",
+    "seed": "bun scripts/seed.ts"
   },
   "dependencies": {
     "@elysiajs/swagger": "^0.7.3",

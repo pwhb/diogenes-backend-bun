@@ -4,7 +4,7 @@
 
 @prefix=api/v1
 
-@collections=users
+@collections=#collectionName
 
 
 ###
@@ -44,5 +44,3 @@ Content-Type: application/json
 ###
 DELETE {{local}}/{{prefix}}/{{collections}}/6519900bd3cea317a658af32
 
-###
-GET {{uat}}

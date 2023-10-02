@@ -8,7 +8,7 @@ export const home: Handler = async (context) =>
     {
         const client = await clientPromise;
         const col = client.db(dbName).collection(Collections.configs);
-        const doc = await col.findOne({ name: "backend-configs" }) as any;
+        const doc = await col.findOne({ name: "backends" }) as any;
         return {
             ...doc["responses"]["root"],
             env: process.env.NODE_ENV

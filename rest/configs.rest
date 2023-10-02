@@ -4,7 +4,7 @@
 
 @prefix=api/v1
 
-@collections=users
+@collections=configs
 
 
 ###
@@ -19,16 +19,21 @@ POST {{local}}/{{prefix}}/{{collections}}
 Content-Type: application/json
 
 {
-    "name": "test",
-    "level": 5
+    "name": "auth",
+    "register": {
+        "default": {
+            "active": true,
+            "role": "player"
+        }
+    }
 }
 
 ###
-PATCH {{local}}/{{prefix}}/{{collections}}/65198c7060873ec8d2509bf6
+PATCH {{local}}/{{prefix}}/{{collections}}/6495160c183665ad2f629e5c
 Content-Type: application/json
 
 {
-    "level": 3
+    "name": "backend"
 }
 
 
@@ -44,5 +49,3 @@ Content-Type: application/json
 ###
 DELETE {{local}}/{{prefix}}/{{collections}}/6519900bd3cea317a658af32
 
-###
-GET {{uat}}

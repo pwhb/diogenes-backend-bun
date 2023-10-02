@@ -1,19 +1,13 @@
 import { Elysia } from "elysia";
-import avatarRouter from "./routes/avatars";
-import indexRouter from "./routes";
-import roleRouter from "./routes/roles";
 import swagger from "@elysiajs/swagger";
 import swaggerConf from "./lib/swagger";
+import router from "./routes";
 
 const port = process.env.PORT || 3000;
 
 const app = new Elysia()
   .use(swagger(swaggerConf))
-  .use(indexRouter)
-  .group("/api/v1", app => app
-    .use(avatarRouter)
-    .use(roleRouter)
-  )
+  .use(router)
   .listen(port);
 
 console.log(

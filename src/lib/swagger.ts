@@ -12,7 +12,8 @@ const swaggerConf: ElysiaSwaggerConfig = {
             { name: Tags.app, description: 'General endpoints' },
             { name: Tags.auth, description: 'Authentication endpoints' },
             { name: Tags.roles, description: 'Roles endpoints' },
-            { name: Tags.avatars, description: 'Avatar endpoints' }
+            { name: Tags.avatars, description: 'Avatar endpoints' },
+            { name: Tags.users, description: 'Users endpoints' }
         ]
     }
 };

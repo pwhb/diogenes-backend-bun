@@ -3,7 +3,7 @@ import { dbName, Collections } from "../lib/consts/db";
 import clientPromise from "../lib/mongodb";
 import { ObjectId } from "mongodb";
 
-const collectionName = Collections.users;
+const collectionName = Collections.configs;
 
 export const createOne: Handler = async (context) =>
 {
@@ -13,13 +13,6 @@ export const createOne: Handler = async (context) =>
         const client = await clientPromise;
         const col = client.db(dbName).collection(collectionName);
 
-        const alreadyExists = await col.findOne({ name: body.name });
-        if (alreadyExists)
-        {
-            return {
-                message: `role ${body.name} already exists.`
-            };
-        }
         const dbRes = await col.insertOne({
             ...body,
             createdAt: new Date(),
@@ -31,9 +24,16 @@ export const createOne: Handler = async (context) =>
         return {
             data: dbRes
         };
-    } catch (error)
+    } catch (error: any)
     {
         console.error(error);
+        if (error.code && error.code === 11000)
+        {
+            context.set.status = 400;
+            return {
+                message: `name is already taken.`
+            };
+        }
         context.set.status = 500;
         return {
             error: error
@@ -41,7 +41,7 @@ export const createOne: Handler = async (context) =>
     }
 };
 
-export const getOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/roles/:id">
+export const getOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/configs/:id">
     = async (context) =>
     {
         try
@@ -67,9 +67,14 @@ export const getMany: Handler = async (context) =>
 {
     try
     {
+        let { limit, page } = context.query as any;
+
+        limit = parseInt(limit) || 20;
+        page = parseInt(page) || 0;
+
         const client = await clientPromise;
         const col = client.db(dbName).collection(collectionName);
-        const docs = await col.find().toArray();
+        const docs = await col.find({}, { skip: limit * page, limit: limit, sort: { createdAt: -1 } }).toArray();
         const total = await col.countDocuments();
 
         return {
@@ -86,7 +91,7 @@ export const getMany: Handler = async (context) =>
     }
 };
 
-export const updateOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/roles/:id"> = async (context) =>
+export const updateOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/configs/:id"> = async (context) =>
 {
     try
     {
@@ -107,9 +112,16 @@ export const updateOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>,
         return {
             data: dbRes
         };
-    } catch (error)
+    } catch (error: any)
     {
         console.error(error);
+        if (error.code && error.code === 11000)
+        {
+            context.set.status = 400;
+            return {
+                message: `name is already taken.`
+            };
+        }
         context.set.status = 500;
         return {
             error: error
@@ -117,7 +129,7 @@ export const updateOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>,
     }
 };
 
-export const replaceOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/roles/:id"> = async (context) =>
+export const replaceOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/configs/:id"> = async (context) =>
 {
     try
     {
@@ -147,7 +159,7 @@ export const replaceOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>
     }
 };
 
-export const deleteOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/roles/:id"> = async (context) =>
+export const deleteOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/configs/:id"> = async (context) =>
 {
     try
     {

@@ -1,11 +1,12 @@
 import Elysia, { t } from "elysia";
-import { createOne, deleteOne, getMany, getOne, replaceOne, updateOne } from "../controllers/roles";
+
 import { Collections } from "../lib/consts/db";
 import Tags from "../lib/consts/tags";
+import { createOne, deleteOne, getMany, getOne, updateOne } from "../controllers/users";
 
-const hook = { detail: { tags: [Tags.roles] } };
+const hook = { detail: { tags: [Tags.users] } };
 
-const roleRouter = new Elysia({ prefix: `/${Collections.roles}` })
+const userRouter = new Elysia({ prefix: `/${Collections.users}` })
     .post("/", createOne, hook)
     .get("/", getMany, hook)
     .get("/:id", getOne, hook)
@@ -13,4 +14,4 @@ const roleRouter = new Elysia({ prefix: `/${Collections.roles}` })
     // .put("/:id", replaceOne, hook)
     .delete("/:id", deleteOne, hook);
 
-export default roleRouter;
+export default userRouter;

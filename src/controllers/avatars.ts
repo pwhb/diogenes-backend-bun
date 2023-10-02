@@ -19,6 +19,7 @@ export const getMany: Handler = async (context) =>
     } catch (error)
     {
         console.error(error);
+        context.set.status = 500;
         return {
             error: error
         };

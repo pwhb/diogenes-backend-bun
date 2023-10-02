@@ -1,9 +1,19 @@
 @local=http://localhost:8000
 
-@uat=https://diogenes-pwhb.koyeb.app/
+@uat=https://diogenes-pwhb.koyeb.app
+
+@prefix=api/v1
+
+@collections=auth
 
 ###
-GET {{local}}/
+POST {{local}}/auth/login
+Content-Type: application/json
+
+{
+    "username": "pwh",
+    "password": "nilar"
+}
 
 ###
 GET {{uat}}
