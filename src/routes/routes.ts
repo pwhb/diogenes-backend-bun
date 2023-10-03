@@ -1,19 +1,17 @@
 import Elysia from "elysia";
-import { createOne, deleteOne, getMany, getOne, replaceOne, updateOne } from "../controllers/configs";
+import { createOne, deleteOne, getMany, getOne, replaceOne, updateOne } from "../controllers/routes";
 import { Collections } from "../lib/consts/db";
 import Tags from "../lib/consts/tags";
 import { setup } from "../lib/plugins";
 import { authenticate, authorize } from "../middlewares/auth";
 import { create, update } from "../middlewares/body";
 
-const hook = { detail: { tags: [Tags.configs] } };
+const hook = { detail: { tags: [Tags.routes] } };
 
-
-
-const configRouter = new Elysia({ prefix: `/${Collections.configs}` })
+const routeRouter = new Elysia({ prefix: `/${Collections.routes}` })
     .use(setup)
     .post("/", createOne, {
-        ...hook, beforeHandle: [authenticate, create]
+        ...hook, beforeHandle: [authenticate, create, authorize]
     })
     .get("/", getMany, hook)
     .get("/:id", getOne, hook)
@@ -27,4 +25,4 @@ const configRouter = new Elysia({ prefix: `/${Collections.configs}` })
         ...hook, beforeHandle: [authenticate, authorize]
     });
 
-export default configRouter;
+export default routeRouter;

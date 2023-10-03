@@ -1,16 +1,28 @@
-import Elysia, { t } from "elysia";
+import Elysia from "elysia";
 import { createOne, deleteOne, getMany, getOne, replaceOne, updateOne } from "../controllers/#collectionName";
 import { Collections } from "../lib/consts/db";
 import Tags from "../lib/consts/tags";
+import { setup } from "../lib/plugins";
+import { authenticate, authorize } from "../middlewares/auth";
+import { create, update } from "../middlewares/body";
 
 const hook = { detail: { tags: [Tags.#collectionName] } };
 
 const #router = new Elysia({ prefix: `/${Collections.#collectionName}` })
-    .post("/", createOne, hook)
+    .use(setup)
+    .post("/", createOne, {
+        ...hook, beforeHandle: [authenticate, create]
+    })
     .get("/", getMany, hook)
     .get("/:id", getOne, hook)
-    .patch("/:id", updateOne, hook)
-    .put("/:id", replaceOne, hook)
-    .delete("/:id", deleteOne, hook);
+    .patch("/:id", updateOne, {
+        ...hook, beforeHandle: [authenticate, update, authorize]
+    })
+    .put("/:id", replaceOne, {
+        ...hook, beforeHandle: [authenticate, update, authorize]
+    })
+    .delete("/:id", deleteOne, {
+        ...hook, beforeHandle: [authenticate, authorize]
+    });
 
 export default #router;

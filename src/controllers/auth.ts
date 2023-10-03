@@ -1,7 +1,7 @@
 import { Handler, RouteSchema } from "elysia";
 import { Collections, dbName } from "../lib/consts/db";
 import clientPromise from "../lib/mongodb";
-import { isMatch } from "../lib/auth";
+import { hash, isMatch } from "../lib/auth";
 
 const collectionName = Collections.users;
 
@@ -9,19 +9,17 @@ export const register: Handler = async (context) =>
 {
     try
     {
-        const body: any = context.body;
+        const { username, password } = context.body as any;
         const client = await clientPromise;
-        const col = client.db(dbName).collection(collectionName);
+        const db = client.db(dbName);
+        const config = await db.collection(Collections.configs).findOne({ name: "auth" }) as any;
 
-        const alreadyExists = await col.findOne({ name: body.name });
-        if (alreadyExists)
-        {
-            return {
-                message: `role ${body.name} already exists.`
-            };
-        }
+        const col = db.collection(collectionName);
+        const hashed = await hash(password);
         const dbRes = await col.insertOne({
-            ...body,
+            username,
+            password: hashed,
+            ...config.register.default,
             createdAt: new Date(),
             updatedAt: new Date()
         });
@@ -31,9 +29,17 @@ export const register: Handler = async (context) =>
         return {
             data: dbRes
         };
-    } catch (error)
+    } catch (error: any)
     {
         console.error(error);
+        if (error.code && error.code === 11000)
+        {
+            context.set.status = 400;
+            return {
+                code: error.code,
+                error: error.message,
+            };
+        }
         context.set.status = 500;
         return {
             error: error
@@ -59,7 +65,8 @@ export const login: Handler = async (context) =>
         }
 
 
-        const isCorrect = await isMatch(alreadyExists.password, password);
+
+        const isCorrect = await isMatch(password, alreadyExists.password);
         if (!isCorrect)
         {
             context.set.status = 400;
@@ -67,10 +74,13 @@ export const login: Handler = async (context) =>
                 message: 'invalid credentials.'
             };
         }
+
         return {
             data: {
                 user: {
-                    ...alreadyExists
+                    username: alreadyExists.username,
+                    active: alreadyExists.active,
+                    role: alreadyExists.role
                 }
             }
         };

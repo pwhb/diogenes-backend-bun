@@ -4,15 +4,16 @@ import clientPromise from "../src/lib/mongodb";
 async function seed()
 {
     const client = await clientPromise;
-    const col = client.db(dbName).collection(Collections.configs);
-    await col.createIndex(
+    const col = client.db(dbName).collection(Collections.routes);
+    const dbRes = await col.createIndex(
         {
-            "name": 1
+            "path": 1,
+            "entity": 1,
+            "method": 1
         },
-        {
-            unique: true,
-        }
+        { unique: true }
     );
+    console.log(dbRes);
 
 }
 

@@ -6,6 +6,6 @@ export const config = {
 
     controllerDir: "src/controllers",
     routerDir: "src/routes",
-    restDir: "rest",
+    restDir: "tmp/rest",
 
 };

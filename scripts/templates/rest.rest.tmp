@@ -6,6 +6,9 @@
 
 @collections=#collectionName
 
+@admin=
+@root=
+@player=
 
 ###
 GET {{local}}/{{prefix}}/{{collections}}
@@ -17,30 +20,32 @@ GET {{local}}/{{prefix}}/{{collections}}/65198dca2d0f9fbd0a2d0b3f
 ###
 POST {{local}}/{{prefix}}/{{collections}}
 Content-Type: application/json
+Authorization: Bearer {{admin}}
 
 {
-    "name": "test",
-    "level": 5
+
 }
 
 ###
 PATCH {{local}}/{{prefix}}/{{collections}}/65198c7060873ec8d2509bf6
 Content-Type: application/json
+Authorization: Bearer {{admin}}
 
 {
-    "level": 3
+
 }
 
 
 ###
 PUT {{local}}/{{prefix}}/{{collections}}/65198dca2d0f9fbd0a2d0b3f
 Content-Type: application/json
+Authorization: Bearer {{admin}}
 
 {
-    "hello": "world"
+
 }
 
 
 ###
 DELETE {{local}}/{{prefix}}/{{collections}}/6519900bd3cea317a658af32
-
+Authorization: Bearer {{admin}}

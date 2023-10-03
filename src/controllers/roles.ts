@@ -12,14 +12,6 @@ export const createOne: Handler = async (context) =>
         const body: any = context.body;
         const client = await clientPromise;
         const col = client.db(dbName).collection(collectionName);
-
-        const alreadyExists = await col.findOne({ name: body.name });
-        if (alreadyExists)
-        {
-            return {
-                message: `role ${body.name} already exists.`
-            };
-        }
         const dbRes = await col.insertOne({
             ...body,
             createdAt: new Date(),
@@ -31,9 +23,17 @@ export const createOne: Handler = async (context) =>
         return {
             data: dbRes
         };
-    } catch (error)
+    } catch (error: any)
     {
         console.error(error);
+        if (error.code && error.code === 11000)
+        {
+            context.set.status = 400;
+            return {
+                code: error.code,
+                error: error.message,
+            };
+        }
         context.set.status = 500;
         return {
             error: error

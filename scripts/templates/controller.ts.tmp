@@ -5,36 +5,32 @@ import { ObjectId } from "mongodb";
 
 const collectionName = Collections.#collectionName;
 
-export const createOne: Handler = async (context) =>
+export const createOne: Handler = async ({ body, set }) =>
 {
     try
     {
-        const body: any = context.body;
         const client = await clientPromise;
         const col = client.db(dbName).collection(collectionName);
 
-        const alreadyExists = await col.findOne({ name: body.name });
-        if (alreadyExists)
-        {
-            return {
-                message: `role ${body.name} already exists.`
-            };
-        }
-        const dbRes = await col.insertOne({
-            ...body,
-            createdAt: new Date(),
-            updatedAt: new Date()
-        });
+        const dbRes = await col.insertOne(body as any);
 
-        context.set.status = 201;
+        set.status = 201;
 
         return {
             data: dbRes
         };
-    } catch (error)
+    } catch (error: any)
     {
         console.error(error);
-        context.set.status = 500;
+        if (error.code && error.code === 11000)
+        {
+            set.status = 400;
+            return {
+                code: error.code,
+                error: error.message,
+            };
+        }
+        set.status = 500;
         return {
             error: error
         };
@@ -42,11 +38,11 @@ export const createOne: Handler = async (context) =>
 };
 
 export const getOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/#collectionName/:id">
-    = async (context) =>
+    = async ({ params, set }) =>
     {
         try
         {
-            const { id } = context.params;
+            const { id } = params;
             const client = await clientPromise;
             const col = client.db(dbName).collection(collectionName);
             const dbRes = await col.findOne({ _id: new ObjectId(id) });
@@ -56,18 +52,18 @@ export const getOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}
         } catch (error)
         {
             console.error(error);
-            context.set.status = 500;
+            set.status = 500;
             return {
                 error: error
             };
         }
     };
 
-export const getMany: Handler = async (context) =>
+export const getMany: Handler = async ({ query, set }) =>
 {
     try
     {
-        let { limit, page } = context.query as any;
+        let { limit, page } = query as any;
 
         limit = parseInt(limit) || 20;
         page = parseInt(page) || 0;
@@ -84,28 +80,25 @@ export const getMany: Handler = async (context) =>
     } catch (error)
     {
         console.error(error);
-        context.set.status = 500;
+        set.status = 500;
         return {
             error: error
         };
     }
 };
 
-export const updateOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/#collectionName/:id"> = async (context) =>
+export const updateOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/#collectionName/:id"> = async ({ params, body, set }) =>
 {
     try
     {
-        const { id } = context.params;
-        const body: any = context.body;
+        const { id } = params;
+
         const client = await clientPromise;
         const col = client.db(dbName).collection(collectionName);
         const dbRes = await col.findOneAndUpdate({
             _id: new ObjectId(id)
         }, {
-            $set: {
-                ...body,
-                updatedAt: new Date()
-            }
+            $set: body as any
         }, {
             returnDocument: "after"
         });
@@ -115,28 +108,23 @@ export const updateOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>,
     } catch (error)
     {
         console.error(error);
-        context.set.status = 500;
+        set.status = 500;
         return {
             error: error
         };
     }
 };
 
-export const replaceOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/#collectionName/:id"> = async (context) =>
+export const replaceOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/#collectionName/:id"> = async ({ params, body, set }) =>
 {
     try
     {
-        const { id } = context.params;
-        const body: any = context.body;
+        const { id } = params;
         const client = await clientPromise;
         const col = client.db(dbName).collection(collectionName);
         const dbRes = await col.findOneAndReplace({
             _id: new ObjectId(id)
-        }, {
-            ...body,
-            createdAt: new Date(),
-            updatedAt: new Date()
-        }, {
+        }, body as any, {
             returnDocument: "after"
         });
         return {
@@ -145,18 +133,18 @@ export const replaceOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>
     } catch (error)
     {
         console.error(error);
-        context.set.status = 500;
+        set.status = 500;
         return {
             error: error
         };
     }
 };
 
-export const deleteOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/#collectionName/:id"> = async (context) =>
+export const deleteOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/#collectionName/:id"> = async ({ params, set }) =>
 {
     try
     {
-        const { id } = context.params;
+        const { id } = params;
         const client = await clientPromise;
         const col = client.db(dbName).collection(collectionName);
         const dbRes = await col.deleteOne({ _id: new ObjectId(id) });
@@ -166,7 +154,7 @@ export const deleteOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>,
     } catch (error)
     {
         console.error(error);
-        context.set.status = 500;
+        set.status = 500;
         return {
             error: error
         };

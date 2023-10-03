@@ -6,10 +6,13 @@ import avatarRouter from "./avatars";
 import roleRouter from "./roles";
 import userRouter from "./users";
 import configRouter from "./configs";
+import swagger from "@elysiajs/swagger";
+import swaggerConf from "../lib/swagger";
+import routeRouter from "./routes";
 
 const hook = { detail: { tags: [Tags.app] } };
-
 const router = new Elysia()
+    .use(swagger(swaggerConf))
     .get("/", home, hook)
     .use(authRouter)
     .group("/api/v1", app => app
@@ -17,6 +20,7 @@ const router = new Elysia()
         .use(roleRouter)
         .use(userRouter)
         .use(configRouter)
+        .use(routeRouter)
     );
 
 export default router;

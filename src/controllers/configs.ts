@@ -5,21 +5,16 @@ import { ObjectId } from "mongodb";
 
 const collectionName = Collections.configs;
 
-export const createOne: Handler = async (context) =>
+export const createOne: Handler = async ({ body, set }) =>
 {
     try
     {
-        const body: any = context.body;
         const client = await clientPromise;
-        const col = client.db(dbName).collection(collectionName);
+        const col = client.db(dbName).collection(Collections.configs);
 
-        const dbRes = await col.insertOne({
-            ...body,
-            createdAt: new Date(),
-            updatedAt: new Date()
-        });
+        const dbRes = await col.insertOne(body as any);
 
-        context.set.status = 201;
+        set.status = 201;
 
         return {
             data: dbRes
@@ -29,12 +24,13 @@ export const createOne: Handler = async (context) =>
         console.error(error);
         if (error.code && error.code === 11000)
         {
-            context.set.status = 400;
+            set.status = 400;
             return {
-                message: `name is already taken.`
+                code: error.code,
+                error: error.message,
             };
         }
-        context.set.status = 500;
+        set.status = 500;
         return {
             error: error
         };
@@ -119,7 +115,8 @@ export const updateOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>,
         {
             context.set.status = 400;
             return {
-                message: `name is already taken.`
+                code: error.code,
+                error: error.message,
             };
         }
         context.set.status = 500;
