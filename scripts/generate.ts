@@ -82,14 +82,16 @@ async function main()
         }
 
         await generateRoutes(collectionName);
-        // const controllerTmp = Bun.file(`${config.prefix}/${config.controllerTmpFileName}`);
-        // await generateFile(controllerTmp, collectionName, config.controllerDir);
 
-        // const routerTmp = Bun.file(`${config.prefix}/${config.routerTmpFileName}`);
-        // await generateFile(routerTmp, collectionName, config.routerDir);
 
-        // const restTmp = Bun.file(`${config.prefix}/${config.restTmpFileName}`);
-        // await generateFile(restTmp, collectionName, config.restDir, "rest");
+        const controllerTmp = Bun.file(`${config.prefix}/${config.controllerTmpFileName}`);
+        await generateFile(controllerTmp, collectionName, config.controllerDir);
+
+        const routerTmp = Bun.file(`${config.prefix}/${config.routerTmpFileName}`);
+        await generateFile(routerTmp, collectionName, config.routerDir);
+
+        const restTmp = Bun.file(`${config.prefix}/${config.restTmpFileName}`);
+        await generateFile(restTmp, collectionName, config.restDir, "rest");
 
     } catch (error)
     {

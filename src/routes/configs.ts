@@ -13,7 +13,7 @@ const hook = { detail: { tags: [Tags.configs] } };
 const configRouter = new Elysia({ prefix: `/${Collections.configs}` })
     .use(setup)
     .post("/", createOne, {
-        ...hook, beforeHandle: [authenticate, create]
+        ...hook, beforeHandle: [authenticate, create, authorize]
     })
     .get("/", getMany, hook)
     .get("/:id", getOne, hook)

@@ -10,17 +10,17 @@ const hook = { detail: { tags: [Tags.routes] } };
 
 const routeRouter = new Elysia({ prefix: `/${Collections.routes}` })
     .use(setup)
-    .post("/", createOne, {
-        ...hook, beforeHandle: [authenticate, create, authorize]
-    })
+    // .post("/", createOne, {
+    //     ...hook, beforeHandle: [authenticate, create, authorize]
+    // })
     .get("/", getMany, hook)
     .get("/:id", getOne, hook)
-    .patch("/:id", updateOne, {
-        ...hook, beforeHandle: [authenticate, update, authorize]
-    })
-    .put("/:id", replaceOne, {
-        ...hook, beforeHandle: [authenticate, update, authorize]
-    })
+    // .patch("/:id", updateOne, {
+    //     ...hook, beforeHandle: [authenticate, update, authorize]
+    // })
+    // .put("/:id", replaceOne, {
+    //     ...hook, beforeHandle: [authenticate, update, authorize]
+    // })
     .delete("/:id", deleteOne, {
         ...hook, beforeHandle: [authenticate, authorize]
     });
