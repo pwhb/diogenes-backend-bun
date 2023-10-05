@@ -8,7 +8,8 @@ async function generateFile(file: BunFile, collectionName: string, dir: string, 
 {
 
     const text = await file.text();
-    const parsed = parseTemplate(text, { collectionName, router: `${collectionName.slice(0, collectionName.length - 1)}Router` });
+    const singular = collectionName.slice(0, collectionName.length - 1);
+    const parsed = parseTemplate(text, { collectionName, router: `${singular}Router` });
     const path = `${dir}/${collectionName}.${fileType}`;
     await Bun.write(path, parsed);
     console.log(`${path} created successfully`);

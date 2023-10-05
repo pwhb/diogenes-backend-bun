@@ -8,8 +8,16 @@ import { create, update } from "../middlewares/body";
 
 const hook = { detail: { tags: [Tags.#collectionName] } };
 
+const model = new Elysia()
+    .model({
+        create: t.Object({
+            name: t.String()
+        })
+    });
+
 const #router = new Elysia({ prefix: `/${Collections.#collectionName}` })
     .use(setup)
+    .use(model)
     .post("/", createOne, {
         ...hook, beforeHandle: [authenticate, create]
     })

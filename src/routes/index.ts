@@ -9,10 +9,15 @@ import configRouter from "./configs";
 import swagger from "@elysiajs/swagger";
 import swaggerConf from "../lib/swagger";
 import routeRouter from "./routes";
+import cors from "@elysiajs/cors";
+import wsRouter from "./ws";
 
 const hook = { detail: { tags: [Tags.app] } };
+
 const router = new Elysia()
+    .use(cors())
     .use(swagger(swaggerConf))
+    .use(wsRouter)
     .get("/", home, hook)
     .use(authRouter)
     .group("/api/v1", app => app
