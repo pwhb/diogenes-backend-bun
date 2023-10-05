@@ -6,6 +6,7 @@ export enum Collections
     configs = "configs",
     users = "users",
     roles = "roles",
-    routes = "routes"
+    routes = "routes",
+    uploads = "uploads"
 }
 

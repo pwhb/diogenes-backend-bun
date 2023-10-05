@@ -1,12 +1,12 @@
 import Elysia, { t } from "elysia";
-import { createOne, deleteOne, getMany, getOne, replaceOne, updateOne } from "../controllers/#collectionName";
+import { createMany, createOne, deleteOne, getMany, getOne, replaceOne, updateOne } from "../controllers/uploads";
 import { Collections } from "../lib/consts/db";
 import Tags from "../lib/consts/tags";
 import { setup } from "../lib/config/plugins";
 import { authenticate, authorize } from "../middlewares/auth";
 import { create, update } from "../middlewares/body";
 
-const hook = { detail: { tags: [Tags.#collectionName] } };
+const hook = { detail: { tags: [Tags.uploads] } };
 
 const model = new Elysia()
     .model({
@@ -15,11 +15,14 @@ const model = new Elysia()
         })
     });
 
-const #router = new Elysia({ prefix: `/${Collections.#collectionName}` })
+const uploadRouter = new Elysia({ prefix: `/${Collections.uploads}` })
     .use(setup)
     .use(model)
     .post("/", createOne, {
-        ...hook, beforeHandle: [authenticate, create]
+        ...hook, beforeHandle: []
+    })
+    .post("/bulk", createMany, {
+        ...hook, beforeHandle: []
     })
     .get("/", getMany, hook)
     .get("/:id", getOne, hook)
@@ -33,4 +36,4 @@ const #router = new Elysia({ prefix: `/${Collections.#collectionName}` })
         ...hook, beforeHandle: [authenticate, authorize]
     });
 
-export default #router;
+export default uploadRouter;

@@ -9,7 +9,6 @@ export const home: Handler = async (context) =>
         const client = await clientPromise;
         const col = client.db(dbName).collection(Collections.configs);
         const doc = await col.findOne({ name: "backend" }) as any;
-        console.log(doc);
 
         return {
             ...doc["responses"]["root"],

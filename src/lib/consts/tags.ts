@@ -6,7 +6,8 @@ enum Tags
     roles = "Roles",
     avatars = "Avatars",
     users = "Users",
-    routes = "Routes"
+    routes = "Routes",
+    uploads = "Uploads"
 }
 
 export default Tags;

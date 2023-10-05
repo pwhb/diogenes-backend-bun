@@ -4,7 +4,7 @@ import { Collections } from "../lib/consts/db";
 import Tags from "../lib/consts/tags";
 import { update } from "../middlewares/body";
 import { authenticate, authorize } from "../middlewares/auth";
-import { setup } from "../lib/plugins";
+import { setup } from "../lib/config/plugins";
 
 const hook = { detail: { tags: [Tags.users] } };
 

@@ -2,7 +2,7 @@ import Elysia from "elysia";
 import { createOne, deleteOne, getMany, getOne, replaceOne, updateOne } from "../controllers/configs";
 import { Collections } from "../lib/consts/db";
 import Tags from "../lib/consts/tags";
-import { setup } from "../lib/plugins";
+import { setup } from "../lib/config/plugins";
 import { authenticate, authorize } from "../middlewares/auth";
 import { create, update } from "../middlewares/body";
 

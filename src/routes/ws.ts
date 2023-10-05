@@ -1,6 +1,6 @@
 import Elysia from "elysia";
 import Tags from "../lib/consts/tags";
-import { setup } from "../lib/plugins";
+import { setup } from "../lib/config/plugins";
 import { dbName, Collections } from "../lib/consts/db";
 import clientPromise from "../lib/mongodb";
 import WsKeys from "../lib/consts/WsKeys";

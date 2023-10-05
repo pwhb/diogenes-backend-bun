@@ -1,7 +1,7 @@
 import Elysia, { t } from "elysia";
 import Tags from "../lib/consts/tags";
 import { changePassword, login, register } from "../controllers/auth";
-import { setup } from "../lib/plugins";
+import { setup } from "../lib/config/plugins";
 
 
 const hook = { detail: { tags: [Tags.auth] } };

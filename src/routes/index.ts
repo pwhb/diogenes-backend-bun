@@ -7,10 +7,12 @@ import roleRouter from "./roles";
 import userRouter from "./users";
 import configRouter from "./configs";
 import swagger from "@elysiajs/swagger";
-import swaggerConf from "../lib/swagger";
+
 import routeRouter from "./routes";
 import cors from "@elysiajs/cors";
 import wsRouter from "./ws";
+import uploadRouter from "./uploads";
+import swaggerConf from "../lib/config/swagger";
 
 const hook = { detail: { tags: [Tags.app] } };
 
@@ -26,6 +28,7 @@ const router = new Elysia()
         .use(userRouter)
         .use(configRouter)
         .use(routeRouter)
+        .use(uploadRouter)
     );
 
 export default router;
