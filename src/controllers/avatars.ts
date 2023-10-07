@@ -1,6 +1,6 @@
 import { Handler } from "elysia";
-import clientPromise from "../lib/mongodb";
 import { Collections, dbName } from "../lib/consts/db";
+import clientPromise from "../lib/services/mongodb";
 
 const collectionName = Collections.avatars;
 export const getMany: Handler = async (context) =>

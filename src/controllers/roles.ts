@@ -1,24 +1,20 @@
 import { Handler, InputSchema, MergeSchema, UnwrapRoute } from "elysia";
 import { dbName, Collections } from "../lib/consts/db";
-import clientPromise from "../lib/mongodb";
-import { ObjectId } from "mongodb";
+import clientPromise from "../lib/services/mongodb";
+import { Filter, ObjectId, Sort } from "mongodb";
+import { Key, Types, parseQuery, parseSort } from "../lib/query";
 
 const collectionName = Collections.roles;
 
-export const createOne: Handler = async (context) =>
+export const createOne: Handler = async ({ body, set }) =>
 {
     try
     {
-        const body: any = context.body;
         const client = await clientPromise;
         const col = client.db(dbName).collection(collectionName);
-        const dbRes = await col.insertOne({
-            ...body,
-            createdAt: new Date(),
-            updatedAt: new Date()
-        });
+        const dbRes = await col.insertOne(body as any);
 
-        context.set.status = 201;
+        set.status = 201;
 
         return {
             data: dbRes
@@ -28,13 +24,13 @@ export const createOne: Handler = async (context) =>
         console.error(error);
         if (error.code && error.code === 11000)
         {
-            context.set.status = 400;
+            set.status = 400;
             return {
                 code: error.code,
                 error: error.message,
             };
         }
-        context.set.status = 500;
+        set.status = 500;
         return {
             error: error
         };
@@ -42,11 +38,11 @@ export const createOne: Handler = async (context) =>
 };
 
 export const getOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/roles/:id">
-    = async (context) =>
+    = async ({ params, set }) =>
     {
         try
         {
-            const { id } = context.params;
+            const { id } = params;
             const client = await clientPromise;
             const col = client.db(dbName).collection(collectionName);
             const dbRes = await col.findOne({ _id: new ObjectId(id) });
@@ -56,26 +52,42 @@ export const getOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}
         } catch (error)
         {
             console.error(error);
-            context.set.status = 500;
+            set.status = 500;
             return {
                 error: error
             };
         }
     };
 
-export const getMany: Handler = async (context) =>
+export const getMany: Handler = async ({ query, set, cookie }) =>
 {
     try
     {
-        let { limit, page } = context.query as any;
+        let { limit, page } = query as any;
 
         limit = parseInt(limit) || 20;
         page = parseInt(page) || 0;
 
+        const filter: Filter<any> = {};
+        const keys: Key[] = [
+            { key: 'active', type: Types.Boolean },
+            { key: '_id', type: Types.ObjectId },
+            { key: "q", type: Types.Regex, searchedKeys: ["name"] },
+            { key: "createdBefore", type: Types.DateBefore, field: "createdAt" },
+            { key: "createdAfter", type: Types.DateAfter, field: "createdAt" }
+        ];
+        const sort: Sort = parseSort(query);
+
+        parseQuery({ filter, keys, query, sort });
+
+        console.log(filter, sort);
+
+
         const client = await clientPromise;
         const col = client.db(dbName).collection(collectionName);
-        const docs = await col.find({}, { skip: limit * page, limit: limit, sort: { createdAt: -1 } }).toArray();
-        const total = await col.countDocuments();
+        const docs = await col.find(filter, { skip: limit * page, limit: limit, sort: sort }).toArray();
+        const total = await col.countDocuments(filter);
+        console.log(docs);
 
         return {
             total: total,
@@ -84,28 +96,24 @@ export const getMany: Handler = async (context) =>
     } catch (error)
     {
         console.error(error);
-        context.set.status = 500;
+        set.status = 500;
         return {
             error: error
         };
     }
 };
 
-export const updateOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/roles/:id"> = async (context) =>
+export const updateOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/roles/:id"> = async ({ params, set, body }) =>
 {
     try
     {
-        const { id } = context.params;
-        const body: any = context.body;
+        const { id } = params;
         const client = await clientPromise;
         const col = client.db(dbName).collection(collectionName);
         const dbRes = await col.findOneAndUpdate({
             _id: new ObjectId(id)
         }, {
-            $set: {
-                ...body,
-                updatedAt: new Date()
-            }
+            $set: body as any
         }, {
             returnDocument: "after"
         });
@@ -115,28 +123,23 @@ export const updateOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>,
     } catch (error)
     {
         console.error(error);
-        context.set.status = 500;
+        set.status = 500;
         return {
             error: error
         };
     }
 };
 
-export const replaceOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/roles/:id"> = async (context) =>
+export const replaceOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/roles/:id"> = async ({ params, body, set }) =>
 {
     try
     {
-        const { id } = context.params;
-        const body: any = context.body;
+        const { id } = params;
         const client = await clientPromise;
         const col = client.db(dbName).collection(collectionName);
         const dbRes = await col.findOneAndReplace({
             _id: new ObjectId(id)
-        }, {
-            ...body,
-            createdAt: new Date(),
-            updatedAt: new Date()
-        }, {
+        }, body as any, {
             returnDocument: "after"
         });
         return {
@@ -145,18 +148,18 @@ export const replaceOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>
     } catch (error)
     {
         console.error(error);
-        context.set.status = 500;
+        set.status = 500;
         return {
             error: error
         };
     }
 };
 
-export const deleteOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/roles/:id"> = async (context) =>
+export const deleteOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/roles/:id"> = async ({ params, set }) =>
 {
     try
     {
-        const { id } = context.params;
+        const { id } = params;
         const client = await clientPromise;
         const col = client.db(dbName).collection(collectionName);
         const dbRes = await col.deleteOne({ _id: new ObjectId(id) });
@@ -166,7 +169,7 @@ export const deleteOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>,
     } catch (error)
     {
         console.error(error);
-        context.set.status = 500;
+        set.status = 500;
         return {
             error: error
         };

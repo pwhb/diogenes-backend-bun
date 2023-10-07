@@ -1,6 +1,6 @@
 import { Handler, InputSchema, MergeSchema, UnwrapRoute } from "elysia";
 import { dbName, Collections } from "../lib/consts/db";
-import clientPromise from "../lib/mongodb";
+import clientPromise from "../lib/services/mongodb";
 import { ObjectId } from "mongodb";
 
 const collectionName = Collections.users;

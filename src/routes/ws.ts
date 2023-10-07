@@ -2,7 +2,7 @@ import Elysia from "elysia";
 import Tags from "../lib/consts/tags";
 import { setup } from "../lib/config/plugins";
 import { dbName, Collections } from "../lib/consts/db";
-import clientPromise from "../lib/mongodb";
+import clientPromise from "../lib/services/mongodb";
 import WsKeys from "../lib/consts/WsKeys";
 
 const hook = { detail: { tags: [Tags.users] } };

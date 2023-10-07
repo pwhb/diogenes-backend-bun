@@ -1,10 +1,12 @@
 import { dbName, Collections } from "../lib/consts/db";
-import clientPromise from "../lib/mongodb";
+import clientPromise from "../lib/services/mongodb";
 
-export const authenticate = async ({ bearer, set, jwt, request }: any) =>
+export const authenticate = async ({ bearer, set, jwt, cookie, request }: any) =>
 {
     try
     {
+        console.log("cookie: ", cookie);
+
         if (!bearer)
         {
             set.status = 401;
@@ -78,10 +80,10 @@ export const authorize = async ({ request, set }: any) =>
             await col.insertOne({ path, entity, method, access });
         }
 
-        if (!access.includes(role))
+        if (!access.includes("all") && !access.includes(role))
         {
             set.status = 403;
-            return "Unauthorized";
+            return { message: "Insufficient permissions" };
         }
     } catch (error)
     {

@@ -1,8 +1,8 @@
 import { BunFile } from "bun";
 import { parseTemplate } from "../src/lib/utils";
 import { config } from "./consts";
-import clientPromise from "../src/lib/mongodb";
 import { Collections, dbName } from "../src/lib/consts/db";
+import clientPromise from "../src/lib/services/mongodb";
 
 async function generateFile(file: BunFile, collectionName: string, dir: string, fileType: string = "ts")
 {
@@ -16,6 +16,18 @@ async function generateFile(file: BunFile, collectionName: string, dir: string, 
 
 }
 
+async function generateCodes(collectionName: string)
+{
+    const controllerTmp = Bun.file(`${config.prefix}/${config.controllerTmpFileName}`);
+    await generateFile(controllerTmp, collectionName, config.controllerDir);
+
+    const routerTmp = Bun.file(`${config.prefix}/${config.routerTmpFileName}`);
+    await generateFile(routerTmp, collectionName, config.routerDir);
+
+    const restTmp = Bun.file(`${config.prefix}/${config.restTmpFileName}`);
+    await generateFile(restTmp, collectionName, config.restDir, "rest");
+}
+
 async function generateRoutes(collectionName: string)
 {
 
@@ -25,32 +37,58 @@ async function generateRoutes(collectionName: string)
 
     const routes = [
         {
+            // name: `GET ${collectionName}/:id`,
+            path: `${collectionName}`,
+            entity: collectionName,
+            method: "GET",
+            access: ["all"],
+            createdBy: "system",
+            createdAt: new Date()
+        },
+        {
+            // name: `GET ${collectionName}/:id`,
+            path: `${collectionName}/:id`,
+            entity: collectionName,
+            method: "GET",
+            access: ["all"],
+            createdBy: "system",
+            createdAt: new Date()
+        },
+        {
             // name: `POST ${collectionName}/:id`,
             path: `${collectionName}`,
             entity: collectionName,
             method: "POST",
-            access
+            access,
+            createdBy: "system",
+            createdAt: new Date()
         },
         {
             // name: `PATCH ${collectionName}/:id`,
             path: `${collectionName}/:id`,
             entity: collectionName,
             method: "PATCH",
-            access
+            access,
+            createdBy: "system",
+            createdAt: new Date()
         },
         {
             // name: `PUT ${collectionName}/:id`,
             path: `${collectionName}/:id`,
             entity: collectionName,
             method: "PUT",
-            access
+            access,
+            createdBy: "system",
+            createdAt: new Date()
         },
         {
             // name: `DELETE ${collectionName}/:id`,
             path: `${collectionName}/:id`,
             entity: collectionName,
             method: "DELETE",
-            access
+            access,
+            createdBy: "system",
+            createdAt: new Date()
         }
     ];
 
@@ -71,6 +109,9 @@ async function generateRoutes(collectionName: string)
 
 }
 
+
+
+
 async function main()
 {
     try
@@ -83,16 +124,8 @@ async function main()
         }
 
         await generateRoutes(collectionName);
+        // await generateCodes(collectionName);
 
-
-        const controllerTmp = Bun.file(`${config.prefix}/${config.controllerTmpFileName}`);
-        await generateFile(controllerTmp, collectionName, config.controllerDir);
-
-        const routerTmp = Bun.file(`${config.prefix}/${config.routerTmpFileName}`);
-        await generateFile(routerTmp, collectionName, config.routerDir);
-
-        const restTmp = Bun.file(`${config.prefix}/${config.restTmpFileName}`);
-        await generateFile(restTmp, collectionName, config.restDir, "rest");
 
     } catch (error)
     {

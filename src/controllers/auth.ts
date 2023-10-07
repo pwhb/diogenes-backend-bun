@@ -1,7 +1,7 @@
 import { Handler, RouteSchema } from "elysia";
 import { Collections, dbName } from "../lib/consts/db";
-import clientPromise from "../lib/mongodb";
-import { hash, isMatch } from "../lib/auth";
+import clientPromise from "../lib/services/mongodb";
+import { hash, isMatch } from "../lib/services/auth";
 import { ObjectId } from "mongodb";
 
 const collectionName = Collections.users;
@@ -48,7 +48,7 @@ export const register: Handler = async ({ body, set }) =>
     }
 };
 
-export const login: Handler = async ({ body, set, jwt }: any) =>
+export const login: Handler = async ({ body, set, jwt, setCookie }: any) =>
 {
     try
     {

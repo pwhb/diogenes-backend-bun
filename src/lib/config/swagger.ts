@@ -1,5 +1,5 @@
 import { ElysiaSwaggerConfig } from "@elysiajs/swagger/src/types";
-import Tags from "./consts/tags";
+import Tags from "../consts/tags";
 
 const swaggerConf: ElysiaSwaggerConfig = {
     documentation: {

@@ -8,26 +8,37 @@ import { setup } from "../lib/config/plugins";
 
 const hook = { detail: { tags: [Tags.roles] } };
 
+export const model = new Elysia()
+    .model({
+        role: t.Object({
+            name: t.String(),
+            level: t.Integer(),
+            active: t.Boolean()
+        })
+    });
+
+
 const roleRouter = new Elysia({ prefix: `/${Collections.roles}` })
     .use(setup)
+    .use(model)
     .post("/", createOne, {
         ...hook,
         beforeHandle: [authenticate, create, authorize],
-        body: t.Object({
-            name: t.String(),
-            level: t.Integer(),
-        })
-    },)
+        body: 'role'
+    })
     .get("/", getMany, hook)
     .get("/:id", getOne, hook)
     .patch("/:id", updateOne, {
-        ...hook, beforeHandle: [authenticate, update, authorize]
+        ...hook,
+        beforeHandle: [authenticate, update, authorize],
+        body: 'role'
     })
     // .put("/:id", replaceOne, {
     //     ...hook, beforeHandle: [authenticate, update, authorize]
     // })
     .delete("/:id", deleteOne, {
-        ...hook, beforeHandle: [authenticate, authorize]
+        ...hook,
+        beforeHandle: [authenticate, authorize]
     });
 
 export default roleRouter;
