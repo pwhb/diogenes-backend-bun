@@ -1,7 +1,8 @@
 import { Handler, InputSchema, MergeSchema, UnwrapRoute } from "elysia";
 import { dbName, Collections } from "../lib/consts/db";
 import clientPromise from "../lib/services/mongodb";
-import { ObjectId } from "mongodb";
+import { Filter, ObjectId, Sort } from "mongodb";
+import { Key, Types, parseQuery, parseSort } from "../lib/query";
 
 const collectionName = Collections.routes;
 
@@ -11,8 +12,13 @@ export const createOne: Handler = async ({ body, set }) =>
     {
         const client = await clientPromise;
         const col = client.db(dbName).collection(collectionName);
+        const doc = body as any;
 
-        const dbRes = await col.insertOne(body as any);
+        if (doc.method === "GET" && doc.path.includes(":id"))
+        {
+            doc.many = true;
+        }
+        const dbRes = await col.insertOne(doc);
 
         set.status = 201;
 
@@ -68,10 +74,26 @@ export const getMany: Handler = async ({ query, set }) =>
         limit = parseInt(limit) || 20;
         page = parseInt(page) || 0;
 
+        const filter = {};
+        const keys: Key[] = [
+            {
+                key: "q",
+                type: Types.Regex,
+                searchedKeys: ["entity", "method", "access"]
+            }
+        ];
+        parseQuery({
+            filter,
+            keys,
+            query
+        });
+        const sort = parseSort(query);
+
+
         const client = await clientPromise;
         const col = client.db(dbName).collection(collectionName);
-        const docs = await col.find({}, { skip: limit * page, limit: limit, sort: { createdAt: -1 } }).toArray();
-        const total = await col.countDocuments();
+        const docs = await col.find(filter, { skip: limit * page, limit: limit, sort: sort }).toArray();
+        const total = await col.countDocuments(filter);
 
         return {
             total: total,
@@ -160,3 +182,67 @@ export const deleteOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>,
         };
     }
 };
+
+
+export const getPermissionByRole: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/:name">
+    = async ({ set, query, request }: any) =>
+    {
+        try
+        {
+            const name = request.user.role;
+            const client = await clientPromise;
+            const db = client.db(dbName);
+            const roleCol = db.collection(Collections.roles);
+            const dbRes = await roleCol.findOne({ name: name });
+            const routeCol = db.collection(Collections.routes);
+            const filter = {
+                active: true,
+                access: { $in: ["all", name] }
+            };
+            const keys: Key[] = [
+                { key: 'active', type: Types.Boolean },
+                { key: 'method', type: Types.String },
+                { key: "entity", type: Types.String },
+            ];
+
+            parseQuery({
+                filter,
+                keys: keys,
+                query
+            });
+            const sort: Sort = parseSort(query);
+
+            const routeRes = await routeCol.aggregate([
+                {
+                    $match: filter
+                },
+                {
+                    $group: {
+                        _id: "$entity",
+                        routes: {
+                            $push: {
+                                method: "$method",
+                                path: "$path"
+                            }
+                        }
+                    }
+                },
+                {
+                    $sort: sort
+                }
+            ]).toArray();
+            return {
+                data: {
+                    role: dbRes,
+                    permissions: routeRes
+                }
+            };
+        } catch (error)
+        {
+            console.error(error);
+            set.status = 500;
+            return {
+                error: error
+            };
+        }
+    };

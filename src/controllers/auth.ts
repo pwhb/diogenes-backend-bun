@@ -80,6 +80,7 @@ export const login: Handler = async ({ body, set, jwt, setCookie }: any) =>
         return {
             data: {
                 user: {
+                    _id: existingUser._id,
                     username: existingUser.username,
                     active: existingUser.active,
                     role: existingUser.role

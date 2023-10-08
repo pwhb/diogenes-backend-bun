@@ -21,8 +21,8 @@ const uploadRouter = new Elysia({ prefix: `/${Collections.uploads}` })
     .post("/", createOne, {
         ...hook, beforeHandle: []
     })
-    .post("/bulk", createMany, {
-        ...hook, beforeHandle: []
+    .post("/multiple", createMany, {
+        ...hook, beforeHandle: [authenticate]
     })
     .get("/", getMany, hook)
     .get("/:id", getOne, hook)

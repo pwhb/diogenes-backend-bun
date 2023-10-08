@@ -72,6 +72,7 @@ export const getMany: Handler = async ({ query, set, cookie }) =>
         const keys: Key[] = [
             { key: 'active', type: Types.Boolean },
             { key: '_id', type: Types.ObjectId },
+            { key: "name", type: Types.String },
             { key: "q", type: Types.Regex, searchedKeys: ["name"] },
             { key: "createdBefore", type: Types.DateBefore, field: "createdAt" },
             { key: "createdAfter", type: Types.DateAfter, field: "createdAt" }

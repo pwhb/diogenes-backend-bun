@@ -26,6 +26,12 @@ export const authenticate = async ({ bearer, set, jwt, cookie, request }: any) =
             set.status = 401;
             return "User Not Found";
         }
+
+        if (!user.active)
+        {
+            set.status = 401;
+            return "Deactivated User";
+        }
         (request as any).user = user;
     } catch (error)
     {

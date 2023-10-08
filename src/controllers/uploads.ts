@@ -1,22 +1,24 @@
 import { Handler, InputSchema, MergeSchema, UnwrapRoute } from "elysia";
-import { dbName, Collections } from "../lib/consts/db";
-import clientPromise from "../lib/services/mongodb";
+import { Collections } from "../lib/consts/db";
 import { ObjectId } from "mongodb";
+import commondbClientPromise from "../lib/services/commondb";
+import { get, remove, upload } from "../lib/services/s3";
 
+const dbName = process.env.COMMON_DB_NAME;
 const collectionName = Collections.uploads;
 
 export const createOne: Handler = async ({ body, set }) =>
 {
     try
     {
-        // const client = await clientPromise;
-        // const col = client.db(dbName).collection(collectionName);
-        // const dbRes = await col.insertOne(body as any);
+        const client = await commondbClientPromise;
+        const col = client.db(dbName).collection(collectionName);
+        const dbRes = await col.insertOne(body as any);
 
         set.status = 201;
 
         return {
-            data: "upload one"
+            data: dbRes
         };
     } catch (error: any)
     {
@@ -36,18 +38,75 @@ export const createOne: Handler = async ({ body, set }) =>
     }
 };
 
-export const createMany: Handler = async ({ body, set }) =>
+const uploadOneFile = async (file: any, fileType?: string, fileName?: string) =>
+{
+
+    const Key = `${new Date().valueOf()}_${fileName ? fileName : file.name}`;
+    const data = await file.arrayBuffer();
+    const ContentType = file.type ? file.type : fileType;
+    const res = await upload({ Key, Body: Buffer.from(data), ContentType });
+    if (res)
+    {
+        return {
+            Key,
+            Size: file.size,
+            ContentType,
+            Bucket: process.env.BUCKET_NAME,
+        };
+    }
+};
+
+
+export const createMany: Handler = async ({ body, set, request }: any) =>
 {
     try
     {
-        // const client = await clientPromise;
-        // const col = client.db(dbName).collection(collectionName);
-        // const dbRes = await col.insertOne(body as any);
+        const client = await commondbClientPromise;
+        const col = client.db(dbName).collection(collectionName);
+        const uploaded: any = [];
+        const failed = [];
+        if (body.files.length > 1)
+        {
+            for (let i in body.files)
+            {
+                const res = await uploadOneFile(
+                    body.files[i],
+                    body.types ? body.types[i] : "",
+                    body.names ? body.names[i] : ""
+                );
+                if (res)
+                {
+                    uploaded.push({ ...res, createdBy: request.user._id, createdAt: new Date() });
+                } else
+                {
+                    failed.push(body.files[i].name);
+                }
 
-        set.status = 201;
+            }
+        } else
+        {
+            const res = await uploadOneFile(body.files, body.types, body.names);
+            if (res)
+            {
+                uploaded.push({ ...res, createdBy: request.user._id, createdAt: new Date() });
+            } else
+            {
+                failed.push(body.files.name);
+            }
+        }
 
+        await col.insertMany(uploaded);
+        if (uploaded.length)
+        {
+            set.status = 201;
+            return {
+                message: failed.length ?
+                    `[${uploaded.length}/${body.files.length || 1}] partially uploaded` : `[${uploaded.length}/${body.files.length || 1}] uploaded successfully`,
+            };
+        }
+        set.status = 406;
         return {
-            data: "upload bulk"
+            message: "failed to upload",
         };
     } catch (error: any)
     {
@@ -74,12 +133,23 @@ export const getOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}
         try
         {
             const { id } = params;
-            const client = await clientPromise;
+            const client = await commondbClientPromise;
             const col = client.db(dbName).collection(collectionName);
             const dbRes = await col.findOne({ _id: new ObjectId(id) });
-            return {
-                data: dbRes
-            };
+            if (!dbRes)
+            {
+                set.status = 404;
+                return {
+                    message: "not found",
+                };
+            }
+            const s3Res = (await get(dbRes!.Key)) as any;
+            const arrayBuffer = await s3Res.Body.transformToByteArray();
+            return new Response(arrayBuffer, {
+                headers: {
+                    "Content-Type": dbRes.ContentType,
+                }
+            });
         } catch (error)
         {
             console.error(error);
@@ -99,7 +169,7 @@ export const getMany: Handler = async ({ query, set }) =>
         limit = parseInt(limit) || 20;
         page = parseInt(page) || 0;
 
-        const client = await clientPromise;
+        const client = await commondbClientPromise;
         const col = client.db(dbName).collection(collectionName);
         const docs = await col.find({}, { skip: limit * page, limit: limit, sort: { createdAt: -1 } }).toArray();
         const total = await col.countDocuments();
@@ -124,7 +194,7 @@ export const updateOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>,
     {
         const { id } = params;
 
-        const client = await clientPromise;
+        const client = await commondbClientPromise;
         const col = client.db(dbName).collection(collectionName);
         const dbRes = await col.findOneAndUpdate({
             _id: new ObjectId(id)
@@ -151,7 +221,7 @@ export const replaceOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>
     try
     {
         const { id } = params;
-        const client = await clientPromise;
+        const client = await commondbClientPromise;
         const col = client.db(dbName).collection(collectionName);
         const dbRes = await col.findOneAndReplace({
             _id: new ObjectId(id)
@@ -176,11 +246,27 @@ export const deleteOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>,
     try
     {
         const { id } = params;
-        const client = await clientPromise;
+        const client = await commondbClientPromise;
         const col = client.db(dbName).collection(collectionName);
-        const dbRes = await col.deleteOne({ _id: new ObjectId(id) });
+        const dbRes = await col.findOne({ _id: new ObjectId(id) });
+        if (!dbRes)
+        {
+            set.status = 404;
+            return {
+                message: "not found",
+            };
+        }
+        const s3Res = await remove(dbRes.Key);
+        if (!s3Res)
+        {
+            return {
+                message: "failed to delete",
+            };
+        }
+        const deleted = await col.deleteOne({ _id: new ObjectId(id) });
         return {
-            data: dbRes
+            data: deleted,
+            s3: s3Res
         };
     } catch (error)
     {

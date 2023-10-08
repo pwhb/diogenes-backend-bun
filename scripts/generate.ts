@@ -42,6 +42,8 @@ async function generateRoutes(collectionName: string)
             entity: collectionName,
             method: "GET",
             access: ["all"],
+            many: true,
+            active: true,
             createdBy: "system",
             createdAt: new Date()
         },
@@ -51,6 +53,7 @@ async function generateRoutes(collectionName: string)
             entity: collectionName,
             method: "GET",
             access: ["all"],
+            active: true,
             createdBy: "system",
             createdAt: new Date()
         },
@@ -60,6 +63,7 @@ async function generateRoutes(collectionName: string)
             entity: collectionName,
             method: "POST",
             access,
+            active: true,
             createdBy: "system",
             createdAt: new Date()
         },
@@ -69,6 +73,7 @@ async function generateRoutes(collectionName: string)
             entity: collectionName,
             method: "PATCH",
             access,
+            active: true,
             createdBy: "system",
             createdAt: new Date()
         },
@@ -78,6 +83,7 @@ async function generateRoutes(collectionName: string)
             entity: collectionName,
             method: "PUT",
             access,
+            active: false,
             createdBy: "system",
             createdAt: new Date()
         },
@@ -87,6 +93,7 @@ async function generateRoutes(collectionName: string)
             entity: collectionName,
             method: "DELETE",
             access,
+            active: false,
             createdBy: "system",
             createdAt: new Date()
         }

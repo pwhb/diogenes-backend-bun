@@ -13,6 +13,7 @@ import cors from "@elysiajs/cors";
 import wsRouter from "./ws";
 import uploadRouter from "./uploads";
 import swaggerConf from "../lib/config/swagger";
+import permissionRouter from "./permissions";
 
 const hook = { detail: { tags: [Tags.app] } };
 
@@ -25,6 +26,7 @@ const router = new Elysia()
     .group("/api/v1", app => app
         .use(avatarRouter)
         .use(roleRouter)
+        .use(permissionRouter)
         .use(userRouter)
         .use(configRouter)
         .use(routeRouter)
