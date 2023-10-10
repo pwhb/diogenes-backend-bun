@@ -2,7 +2,7 @@ import { ObjectId } from "mongodb";
 
 export const create = ({ request, body }: any) =>
 {
-    (body as any).active = false;
+    // (body as any).active = false;
     if ((request as any).user)
     {
         (body as any).createdBy = new ObjectId((request as any).user._id);

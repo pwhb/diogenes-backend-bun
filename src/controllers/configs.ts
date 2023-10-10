@@ -114,7 +114,6 @@ export const updateOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>,
         }, {
             $set: {
                 ...body,
-                updatedAt: new Date()
             }
         }, {
             returnDocument: "after"
