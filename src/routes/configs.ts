@@ -1,5 +1,5 @@
 import Elysia from "elysia";
-import { createOne, deleteOne, getMany, getOne, replaceOne, updateOne } from "../controllers/configs";
+import { createOne, deleteOne, getMany, getOne, getOneByName, replaceOne, updateOne } from "../controllers/configs";
 import { Collections } from "../lib/consts/db";
 import Tags from "../lib/consts/tags";
 import { setup } from "../lib/config/plugins";
@@ -17,6 +17,7 @@ const configRouter = new Elysia({ prefix: `/${Collections.configs}` })
     })
     .get("/", getMany, hook)
     .get("/:id", getOne, hook)
+    .get("/getOneByName/:name", getOneByName, hook)
     .patch("/:id", updateOne, {
         ...hook, beforeHandle: [authenticate, update, authorize]
     })

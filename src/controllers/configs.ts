@@ -38,6 +38,28 @@ export const createOne: Handler = async ({ body, set }) =>
     }
 };
 
+export const getOneByName: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/configs/getOneByName/:name">
+    = async (context) =>
+    {
+        try
+        {
+            const { name } = context.params;
+            const client = await clientPromise;
+            const col = client.db(dbName).collection(collectionName);
+            const dbRes = await col.findOne({ name: name });
+            return {
+                data: dbRes
+            };
+        } catch (error)
+        {
+            console.error(error);
+            context.set.status = 500;
+            return {
+                error: error
+            };
+        }
+    };
+
 export const getOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/configs/:id">
     = async (context) =>
     {

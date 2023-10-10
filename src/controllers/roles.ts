@@ -85,7 +85,6 @@ export const getMany: Handler = async ({ query, set, cookie }) =>
         const col = client.db(dbName).collection(collectionName);
         const docs = await col.find(filter, { skip: limit * page, limit: limit, sort: sort }).toArray();
         const total = await col.countDocuments(filter);
-        console.log(docs);
 
         return {
             total: total,

@@ -126,6 +126,34 @@ export const createMany: Handler = async ({ body, set, request }: any) =>
         };
     }
 };
+export const getInfoById: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/uploads/getInfoById/:id">
+    = async ({ params, set }) =>
+    {
+        try
+        {
+            const { id } = params;
+            const client = await commondbClientPromise;
+            const col = client.db(dbName).collection(collectionName);
+            const dbRes = await col.findOne({ _id: new ObjectId(id) });
+            if (!dbRes)
+            {
+                set.status = 404;
+                return {
+                    message: "not found",
+                };
+            }
+            return {
+                data: dbRes
+            };
+        } catch (error)
+        {
+            console.error(error);
+            set.status = 500;
+            return {
+                error: error
+            };
+        }
+    };
 
 
 export const getOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/uploads/:id">

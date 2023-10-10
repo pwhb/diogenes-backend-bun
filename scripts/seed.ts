@@ -1,5 +1,5 @@
 import { Collections, dbName } from "../src/lib/consts/db";
-import clientPromise from "../src/lib/mongodb";
+import clientPromise from "../src/lib/services/mongodb";
 
 async function seed()
 {
@@ -13,7 +13,7 @@ async function seed()
         },
         { unique: true }
     );
-    console.log(dbRes);
+    console.info(dbRes);
 
 }
 

@@ -5,8 +5,6 @@ export const authenticate = async ({ bearer, set, jwt, cookie, request }: any) =
 {
     try
     {
-        console.log("cookie: ", cookie);
-
         if (!bearer)
         {
             set.status = 401;
@@ -47,7 +45,7 @@ export const authorize = async ({ request, set }: any) =>
 
     try
     {
-        console.log(request.user);
+
 
         if (!request.user)
         {
@@ -69,17 +67,14 @@ export const authorize = async ({ request, set }: any) =>
         const [entity, id] = pathname.split("/");
         const path = `${entity}${id ? "/:id" : ""}`;
 
-        console.log({ path, method });
+
 
 
         const client = await clientPromise;
         const col = client.db(dbName).collection(Collections.routes);
 
-
         const route = await col.findOne({ path, method });
         const access = route ? route.access : defaultAccess;
-
-        console.log({ access, role });
 
         if (!route)
         {

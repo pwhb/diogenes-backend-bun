@@ -7,6 +7,6 @@ const app = new Elysia()
   .use(router)
   .listen(port);
 
-console.log(
+console.info(
   `🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}`
 );

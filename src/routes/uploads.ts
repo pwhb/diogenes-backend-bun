@@ -1,5 +1,5 @@
 import Elysia, { t } from "elysia";
-import { createMany, createOne, deleteOne, getMany, getOne, replaceOne, updateOne } from "../controllers/uploads";
+import { createMany, createOne, deleteOne, getInfoById, getMany, getOne, replaceOne, updateOne } from "../controllers/uploads";
 import { Collections } from "../lib/consts/db";
 import Tags from "../lib/consts/tags";
 import { setup } from "../lib/config/plugins";
@@ -26,6 +26,7 @@ const uploadRouter = new Elysia({ prefix: `/${Collections.uploads}` })
     })
     .get("/", getMany, hook)
     .get("/:id", getOne, hook)
+    .get("/getInfoById/:id", getInfoById, hook)
     .patch("/:id", updateOne, {
         ...hook, beforeHandle: [authenticate, update, authorize]
     })

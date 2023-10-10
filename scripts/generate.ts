@@ -12,7 +12,7 @@ async function generateFile(file: BunFile, collectionName: string, dir: string, 
     const parsed = parseTemplate(text, { collectionName, router: `${singular}Router` });
     const path = `${dir}/${collectionName}.${fileType}`;
     await Bun.write(path, parsed);
-    console.log(`${path} created successfully`);
+    console.info(`${path} created successfully`);
 
 }
 
@@ -107,7 +107,7 @@ async function generateRoutes(collectionName: string)
         {
 
             const created = await col.insertOne(r);
-            console.log(`${r.method} ${r.path} created`);
+            console.info(`${r.method} ${r.path} created`);
         } catch (error)
         {
             console.error(`${r.method} ${r.path} already exists`);
