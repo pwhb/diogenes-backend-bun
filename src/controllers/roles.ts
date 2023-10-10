@@ -81,9 +81,6 @@ export const getMany: Handler = async ({ query, set, cookie }) =>
 
         parseQuery({ filter, keys, query, sort });
 
-        console.log(filter, sort);
-
-
         const client = await clientPromise;
         const col = client.db(dbName).collection(collectionName);
         const docs = await col.find(filter, { skip: limit * page, limit: limit, sort: sort }).toArray();

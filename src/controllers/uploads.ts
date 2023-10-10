@@ -3,6 +3,7 @@ import { Collections } from "../lib/consts/db";
 import { ObjectId } from "mongodb";
 import commondbClientPromise from "../lib/services/commondb";
 import { get, remove, upload } from "../lib/services/s3";
+import { Key, Types, parseQuery, parseSort } from "../lib/query";
 
 const dbName = process.env.COMMON_DB_NAME;
 const collectionName = Collections.uploads;
@@ -169,10 +170,25 @@ export const getMany: Handler = async ({ query, set }) =>
         limit = parseInt(limit) || 20;
         page = parseInt(page) || 0;
 
+        const filter = {};
+        const keys: Key[] = [
+            {
+                key: "q",
+                type: Types.Regex,
+                searchedKeys: ["Key", "ContentType"]
+            }
+        ];
+        parseQuery({
+            filter,
+            keys,
+            query
+        });
+        const sort = parseSort(query);
+
         const client = await commondbClientPromise;
         const col = client.db(dbName).collection(collectionName);
-        const docs = await col.find({}, { skip: limit * page, limit: limit, sort: { createdAt: -1 } }).toArray();
-        const total = await col.countDocuments();
+        const docs = await col.find(filter, { skip: limit * page, limit: limit, sort: sort }).toArray();
+        const total = await col.countDocuments(filter);
 
         return {
             total: total,

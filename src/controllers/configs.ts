@@ -2,6 +2,7 @@ import { Handler, InputSchema, MergeSchema, UnwrapRoute } from "elysia";
 import { dbName, Collections } from "../lib/consts/db";
 import clientPromise from "../lib/services/mongodb";
 import { ObjectId } from "mongodb";
+import { Key, Types, parseQuery, parseSort } from "../lib/query";
 
 const collectionName = Collections.configs;
 
@@ -59,19 +60,32 @@ export const getOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}
         }
     };
 
-export const getMany: Handler = async (context) =>
+export const getMany: Handler = async ({ query, set }) =>
 {
     try
     {
-        let { limit, page } = context.query as any;
+        let { limit, page } = query as any;
 
         limit = parseInt(limit) || 20;
         page = parseInt(page) || 0;
-
+        const filter = {};
+        const keys: Key[] = [
+            {
+                key: "q",
+                type: Types.Regex,
+                searchedKeys: ["name"]
+            }
+        ];
+        parseQuery({
+            filter,
+            keys,
+            query
+        });
+        const sort = parseSort(query);
         const client = await clientPromise;
         const col = client.db(dbName).collection(collectionName);
-        const docs = await col.find({}, { skip: limit * page, limit: limit, sort: { createdAt: -1 } }).toArray();
-        const total = await col.countDocuments();
+        const docs = await col.find(filter, { skip: limit * page, limit: limit, sort: sort }).toArray();
+        const total = await col.countDocuments(filter);
 
         return {
             total: total,
@@ -80,7 +94,7 @@ export const getMany: Handler = async (context) =>
     } catch (error)
     {
         console.error(error);
-        context.set.status = 500;
+        set.status = 500;
         return {
             error: error
         };
