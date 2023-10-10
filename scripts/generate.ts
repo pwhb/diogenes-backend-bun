@@ -131,7 +131,7 @@ async function main()
         }
 
         await generateRoutes(collectionName);
-        // await generateCodes(collectionName);
+        await generateCodes(collectionName);
 
 
     } catch (error)
