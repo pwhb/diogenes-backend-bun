@@ -56,7 +56,13 @@ export const login: Handler = async ({ body, set, jwt, setCookie }: any) =>
         const client = await clientPromise;
         const col = client.db(dbName).collection(collectionName);
 
-        const existingUser = await col.findOne({ username: username });
+        const existingUser = await col.findOne({ username: username }, {
+            projection: {
+                createdAt: 0,
+                updatedAt: 0,
+                updatedBy: 0
+            }
+        });
         if (!existingUser)
         {
             set.status = 404;
@@ -76,15 +82,12 @@ export const login: Handler = async ({ body, set, jwt, setCookie }: any) =>
             };
         }
 
-        const token = await jwt.sign({ username });
+        delete existingUser.password;
+
+        const token = await jwt.sign({ _id: existingUser._id });
         return {
             data: {
-                user: {
-                    _id: existingUser._id,
-                    username: existingUser.username,
-                    active: existingUser.active,
-                    role: existingUser.role
-                },
+                user: existingUser,
                 token: token
             }
         };

@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 import { dbName, Collections } from "../lib/consts/db";
 import clientPromise from "../lib/services/mongodb";
 
@@ -10,15 +11,15 @@ export const authenticate = async ({ bearer, set, jwt, cookie, request }: any) =
             set.status = 401;
             return "No Bearer Token";
         }
-        const { username } = await jwt.verify(bearer) as any;
-        if (!username)
+        const { _id } = await jwt.verify(bearer) as any;
+        if (!_id)
         {
             set.status = 401;
             return "Invalid Bearer Token";
         }
         const client = await clientPromise;
         const col = client.db(dbName).collection(Collections.users);
-        const user = await col.findOne({ username });
+        const user = await col.findOne({ _id: new ObjectId(_id) });
         if (!user)
         {
             set.status = 401;
@@ -45,8 +46,6 @@ export const authorize = async ({ request, set }: any) =>
 
     try
     {
-
-
         if (!request.user)
         {
             set.status = 401;
@@ -60,15 +59,10 @@ export const authorize = async ({ request, set }: any) =>
             return "Unauthorized";
         }
 
-
-
         const method = request.method;
         const [_, pathname] = request.url.split("api/v1/");
         const [entity, id] = pathname.split("/");
         const path = `${entity}${id ? "/:id" : ""}`;
-
-
-
 
         const client = await clientPromise;
         const col = client.db(dbName).collection(Collections.routes);
@@ -92,5 +86,29 @@ export const authorize = async ({ request, set }: any) =>
         return "Server Error";
     }
 
+};
+
+export const authorizeSelf = async ({ request, set, params }: any) =>
+{
+
+    try
+    {
+        if (!request.user)
+        {
+            set.status = 401;
+            return "Unauthenticated";
+        }
+
+        if (params.id !== request.user._id)
+        {
+            set.status = 403;
+            return "Unauthorized";
+        }
+    } catch (error)
+    {
+        console.error(error);
+        return "Server Error";
+    }
 
 };
+

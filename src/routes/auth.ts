@@ -2,6 +2,8 @@ import Elysia, { t } from "elysia";
 import Tags from "../lib/consts/tags";
 import { changePassword, login, register } from "../controllers/auth";
 import { setup } from "../lib/config/plugins";
+import { authenticate, authorize } from "../middlewares/auth";
+import { update } from "../middlewares/body";
 
 
 const hook = { detail: { tags: [Tags.auth] } };
@@ -32,7 +34,8 @@ const authRouter = new Elysia({ prefix: `/auth` })
     })
     .post("/changePassword", changePassword, {
         ...hook,
-        body: 'changePassword'
+        body: 'changePassword',
+        beforeHandle: [authenticate, update, authorize]
     });
 
 export default authRouter;

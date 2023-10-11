@@ -3,6 +3,7 @@ import { dbName, Collections } from "../lib/consts/db";
 import clientPromise from "../lib/services/mongodb";
 import { ObjectId } from "mongodb";
 import { Key, Types, parseQuery, parseSort } from "../lib/query";
+import { hash, isMatch } from "../lib/services/auth";
 
 const collectionName = Collections.users;
 
@@ -107,36 +108,123 @@ export const getMany: Handler = async ({ query, set }) =>
     }
 };
 
-export const updateOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/users/:id"> = async (context) =>
+export const updateSelf: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/users/update"> = async ({ request, body, set }: any) =>
 {
     try
     {
-        const { id } = context.params;
-        const body: any = context.body;
+
+        const id = request.user._id;
+        const update = { ...body as any };
+
+
+        delete update.password;
+        delete update.role;
+        delete update.createdAt;
+
         const client = await clientPromise;
         const col = client.db(dbName).collection(collectionName);
-        const dbRes = await col.findOneAndUpdate({
+        const dbRes: any = await col.findOneAndUpdate({
             _id: new ObjectId(id)
         }, {
-            $set: {
-                ...body,
-                updatedAt: new Date()
-            }
+            $set: update
         }, {
             returnDocument: "after"
         });
+
+        delete dbRes.password;
         return {
             data: dbRes
         };
     } catch (error)
     {
         console.error(error);
-        context.set.status = 500;
+        set.status = 500;
         return {
             error: error
         };
     }
 };
+
+export const changePassword: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/users/changePassword"> = async ({ request, body, set }: any) =>
+{
+    try
+    {
+
+        const id = request.user._id;
+        const { password, newPassword } = body as any;
+
+        const client = await clientPromise;
+        const col = client.db(dbName).collection(collectionName);
+
+        const existingUser: any = await col.findOne({ _id: new ObjectId(id) }, {
+            projection: {
+                password: 1
+            }
+        });
+        const isCorrect = await isMatch(password, existingUser.password);
+        if (!isCorrect)
+        {
+            set.status = 400;
+            return {
+                message: 'invalid credentials.'
+            };
+        }
+        const hashed = await hash(newPassword);
+        const dbRes: any = await col.findOneAndUpdate({
+            _id: new ObjectId(id)
+        }, {
+            $set: {
+                password: hashed
+            }
+        }, {
+            returnDocument: "after"
+        });
+
+        delete dbRes.password;
+        return {
+            data: dbRes
+        };
+    } catch (error)
+    {
+        console.error(error);
+        set.status = 500;
+        return {
+            error: error
+        };
+    }
+};
+
+export const updateOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/users/:id"> = async ({ params, body, set }) =>
+{
+    try
+    {
+        const { id } = params;
+        const client = await clientPromise;
+        const col = client.db(dbName).collection(collectionName);
+        const dbRes: any = await col.findOneAndUpdate({
+            _id: new ObjectId(id)
+        }, {
+            $set: {
+                ...body as any,
+            }
+        }, {
+            returnDocument: "after"
+        });
+
+        delete dbRes.password;
+        return {
+            data: dbRes
+        };
+    } catch (error)
+    {
+        console.error(error);
+        set.status = 500;
+        return {
+            error: error
+        };
+    }
+};
+
 
 export const replaceOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/users/:id"> = async (context) =>
 {
