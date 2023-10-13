@@ -9,5 +9,6 @@ export enum Collections
     routes = "routes",
     uploads = "uploads",
     rooms = "rooms",
+    followings = "followings",
 }
 

@@ -80,6 +80,15 @@ export const getMany: Handler = async ({ query, set }) =>
                 key: "q",
                 type: Types.Regex,
                 searchedKeys: ["username", "role"]
+            },
+            {
+                key: "search",
+                type: Types.Regex,
+                searchedKeys: ["username"]
+            },
+            {
+                key: "active",
+                type: Types.Boolean
             }
         ];
         parseQuery({
@@ -173,10 +182,12 @@ export const changePassword: Handler<MergeSchema<UnwrapRoute<InputSchema<never>,
                 password: hashed
             }
         }, {
-            returnDocument: "after"
+            returnDocument: "after",
+            projection: {
+                password: 0
+            }
         });
 
-        delete dbRes.password;
         return {
             data: dbRes
         };

@@ -1,5 +1,3 @@
-import { Permission } from "@aws-sdk/client-s3";
-
 enum Tags
 {
     app = "App",
@@ -12,6 +10,7 @@ enum Tags
     uploads = "Uploads",
     permissions = "Permissions",
     rooms = "Rooms",
+    followings = "Followings",
 }
 
 export default Tags;
