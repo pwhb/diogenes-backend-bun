@@ -2,7 +2,7 @@ import Elysia, { t } from "elysia";
 
 const #singularModel = new Elysia()
     .model({
-        role: t.Object({
+        #singular: t.Object({
             name: t.Optional(t.String()),
             active: t.Optional(t.Boolean()),
         })

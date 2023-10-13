@@ -13,15 +13,21 @@ const roomRouter = new Elysia({ prefix: `/${Collections.rooms}` })
     .use(setup)
     .use(roomModel)
     .post("/", createOne, {
-        ...hook, beforeHandle: [authenticate, create]
+        ...hook,
+        beforeHandle: [authenticate, create],
+        body: 'room'
     })
     .get("/", getMany, hook)
     .get("/:id", getOne, hook)
     .patch("/:id", updateOne, {
-        ...hook, beforeHandle: [authenticate, update, authorize]
+        ...hook,
+        beforeHandle: [authenticate, update, authorize],
+        body: 'room'
     })
     .put("/:id", replaceOne, {
-        ...hook, beforeHandle: [authenticate, update, authorize]
+        ...hook,
+        beforeHandle: [authenticate, update, authorize],
+        body: 'room'
     })
     .delete("/:id", deleteOne, {
         ...hook, beforeHandle: [authenticate, authorize]

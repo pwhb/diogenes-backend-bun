@@ -13,15 +13,21 @@ const #singularRouter = new Elysia({ prefix: `/${Collections.#collectionName}` }
     .use(setup)
     .use(#singularModel)
     .post("/", createOne, {
-        ...hook, beforeHandle: [authenticate, create]
+        ...hook,
+        beforeHandle: [authenticate, create],
+        body: '#singular'
     })
     .get("/", getMany, hook)
     .get("/:id", getOne, hook)
     .patch("/:id", updateOne, {
-        ...hook, beforeHandle: [authenticate, update, authorize]
+        ...hook,
+        beforeHandle: [authenticate, update, authorize],
+        body: '#singular'
     })
     .put("/:id", replaceOne, {
-        ...hook, beforeHandle: [authenticate, update, authorize]
+        ...hook,
+        beforeHandle: [authenticate, update, authorize],
+        body: '#singular'
     })
     .delete("/:id", deleteOne, {
         ...hook, beforeHandle: [authenticate, authorize]
