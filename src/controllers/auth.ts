@@ -71,7 +71,13 @@ export const login: Handler = async ({ body, set, jwt, setCookie }: any) =>
             };
         }
 
-
+        if (!existingUser.active)
+        {
+            set.status = 404;
+            return {
+                message: `user is deactivated.`
+            };
+        }
 
         const isCorrect = await isMatch(password, existingUser.password);
         if (!isCorrect)

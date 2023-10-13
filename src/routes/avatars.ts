@@ -5,21 +5,14 @@ import Tags from "../lib/consts/tags";
 import { setup } from "../lib/config/plugins";
 import { authenticate, authorize } from "../middlewares/auth";
 import { create, update } from "../middlewares/body";
+import avatarModel from "../models/avatars";
 
 const hook = { detail: { tags: [Tags.avatars] } };
 
-const model = new Elysia()
-    .model({
-        create: t.Object({
-            path: t.String(),
-            name: t.String(),
-            active: t.Boolean(),
-        })
-    });
 
 const avatarRouter = new Elysia({ prefix: `/${Collections.avatars}` })
     .use(setup)
-    .use(model)
+    .use(avatarModel)
     .post("/", createOne, {
         ...hook, beforeHandle: [authenticate, create]
     })

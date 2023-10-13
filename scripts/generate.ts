@@ -9,7 +9,7 @@ async function generateFile(file: BunFile, collectionName: string, dir: string, 
 
     const text = await file.text();
     const singular = collectionName.slice(0, collectionName.length - 1);
-    const parsed = parseTemplate(text, { collectionName, router: `${singular}Router` });
+    const parsed = parseTemplate(text, { collectionName, router: `${singular}Router`, singular });
     const path = `${dir}/${collectionName}.${fileType}`;
     await Bun.write(path, parsed);
     console.info(`${path} created successfully`);
@@ -23,6 +23,9 @@ async function generateCodes(collectionName: string)
 
     const routerTmp = Bun.file(`${config.prefix}/${config.routerTmpFileName}`);
     await generateFile(routerTmp, collectionName, config.routerDir);
+
+    const modelTmp = Bun.file(`${config.prefix}/${config.modelTmpFileName}`);
+    await generateFile(modelTmp, collectionName, config.modelDir);
 
     const restTmp = Bun.file(`${config.prefix}/${config.restTmpFileName}`);
     await generateFile(restTmp, collectionName, config.restDir, "rest");

@@ -116,11 +116,6 @@ export const updateSelf: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>
         const id = request.user._id;
         const update = { ...body as any };
 
-
-        delete update.password;
-        delete update.role;
-        delete update.createdAt;
-
         const client = await clientPromise;
         const col = client.db(dbName).collection(collectionName);
         const dbRes: any = await col.findOneAndUpdate({
@@ -128,10 +123,11 @@ export const updateSelf: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>
         }, {
             $set: update
         }, {
-            returnDocument: "after"
+            returnDocument: "after",
+            projection: {
+                password: 0
+            }
         });
-
-        delete dbRes.password;
         return {
             data: dbRes
         };

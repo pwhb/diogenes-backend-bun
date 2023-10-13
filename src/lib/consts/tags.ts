@@ -10,7 +10,8 @@ enum Tags
     users = "Users",
     routes = "Routes",
     uploads = "Uploads",
-    permissions = "Permissions"
+    permissions = "Permissions",
+    rooms = "Rooms",
 }
 
 export default Tags;

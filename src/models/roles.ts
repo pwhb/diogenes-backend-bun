@@ -1,12 +1,12 @@
 import Elysia, { t } from "elysia";
 
-const avatarModel = new Elysia()
+const roleModel = new Elysia()
     .model({
-        avatar: t.Object({
-            path: t.Optional(t.String()),
+        role: t.Object({
             name: t.Optional(t.String()),
+            level: t.Optional(t.Integer()),
             active: t.Optional(t.Boolean()),
         })
     });
 
-export default avatarModel;
+export default roleModel;

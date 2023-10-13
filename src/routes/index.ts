@@ -14,6 +14,7 @@ import wsRouter from "./ws";
 import uploadRouter from "./uploads";
 import swaggerConf from "../lib/config/swagger";
 import permissionRouter from "./permissions";
+import roomRouter from "./rooms";
 
 const hook = { detail: { tags: [Tags.app] } };
 
@@ -31,6 +32,7 @@ const router = new Elysia()
         .use(configRouter)
         .use(routeRouter)
         .use(uploadRouter)
+        .use(roomRouter)
     );
 
 export default router;

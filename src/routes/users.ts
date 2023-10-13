@@ -5,22 +5,32 @@ import Tags from "../lib/consts/tags";
 import { update } from "../middlewares/body";
 import { authenticate, authorize, authorizeSelf } from "../middlewares/auth";
 import { setup } from "../lib/config/plugins";
+import userModel from "../models/users";
 
 const hook = { detail: { tags: [Tags.users] } };
 
+
+
 const userRouter = new Elysia({ prefix: `/${Collections.users}` })
     .use(setup)
+    .use(userModel)
     // .post("/", createOne, hook)
     .get("/", getMany, hook)
     .get("/:id", getOne, hook)
     .patch("/update", updateSelf, {
-        ...hook, beforeHandle: [authenticate, update]
+        ...hook,
+        beforeHandle: [authenticate, update],
+        body: "self"
     })
     .patch("/changePassword", changePassword, {
-        ...hook, beforeHandle: [authenticate, update]
+        ...hook,
+        beforeHandle: [authenticate, update],
+        body: "changePassword"
     })
     .patch("/:id", updateOne, {
-        ...hook, beforeHandle: [authenticate, update, authorize]
+        ...hook,
+        beforeHandle: [authenticate, update, authorize],
+        body: "user"
     })
     // .put("/:id", replaceOne, hook)
     .delete("/:id", deleteOne, {

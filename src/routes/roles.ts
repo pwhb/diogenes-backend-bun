@@ -5,22 +5,13 @@ import Tags from "../lib/consts/tags";
 import { authenticate, authorize } from "../middlewares/auth";
 import { create, update } from "../middlewares/body";
 import { setup } from "../lib/config/plugins";
+import roleModel from "../models/roles";
 
 const hook = { detail: { tags: [Tags.roles] } };
 
-export const model = new Elysia()
-    .model({
-        role: t.Object({
-            name: t.String(),
-            level: t.Integer(),
-            active: t.Boolean()
-        })
-    });
-
-
 const roleRouter = new Elysia({ prefix: `/${Collections.roles}` })
     .use(setup)
-    .use(model)
+    .use(roleModel)
     .post("/", createOne, {
         ...hook,
         beforeHandle: [authenticate, create, authorize],

@@ -4,26 +4,14 @@ import { changePassword, login, register } from "../controllers/auth";
 import { setup } from "../lib/config/plugins";
 import { authenticate, authorize } from "../middlewares/auth";
 import { update } from "../middlewares/body";
+import userModel from "../models/users";
 
 
 const hook = { detail: { tags: [Tags.auth] } };
 
-export const model = new Elysia()
-    .model({
-        auth: t.Object({
-            username: t.String(),
-            password: t.String()
-        }),
-        changePassword: t.Object({
-            username: t.String(),
-            password: t.String(),
-            newPassword: t.String()
-        })
-    });
-
 const authRouter = new Elysia({ prefix: `/auth` })
     .use(setup)
-    .use(model)
+    .use(userModel)
     .post("/login", login, {
         ...hook,
         body: 'auth'

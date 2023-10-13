@@ -5,28 +5,24 @@ import Tags from "../lib/consts/tags";
 import { setup } from "../lib/config/plugins";
 import { authenticate, authorize } from "../middlewares/auth";
 import { create, update } from "../middlewares/body";
+import routeModel from "../models/routes";
 
 const hook = { detail: { tags: [Tags.routes] } };
 
-export const model = new Elysia()
-    .model({
-        role: t.Object({
-            path: t.String(),
-            entity: t.String(),
-            method: t.String(),
-            access: t.Array(t.String()),
-            active: t.Boolean()
-        })
-    });
 const routeRouter = new Elysia({ prefix: `/${Collections.routes}` })
     .use(setup)
+    .use(routeModel)
     .post("/", createOne, {
-        ...hook, beforeHandle: [authenticate, create, authorize]
+        ...hook,
+        beforeHandle: [authenticate, create, authorize],
+        body: 'route'
     })
     .get("/", getMany, hook)
     .get("/:id", getOne, hook)
     .patch("/:id", updateOne, {
-        ...hook, beforeHandle: [authenticate, update, authorize]
+        ...hook,
+        beforeHandle: [authenticate, update, authorize],
+        body: 'route'
     })
     // .put("/:id", replaceOne, {
     //     ...hook, beforeHandle: [authenticate, update, authorize]

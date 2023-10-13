@@ -8,16 +8,39 @@ import { Key, Types, parseQuery, parseSort } from "../lib/query";
 const dbName = process.env.COMMON_DB_NAME;
 const collectionName = Collections.uploads;
 
-export const createOne: Handler = async ({ body, set }) =>
+const uploadOneFile = async (file: any, fileType?: string, fileName?: string) =>
+{
+
+    const Key = `${new Date().valueOf()}_${fileName ? fileName : file.name}`;
+    const data = await file.arrayBuffer();
+    const ContentType = file.type ? file.type : fileType;
+    const res = await upload({ Key, Body: Buffer.from(data), ContentType });
+    if (res)
+    {
+        return {
+            Key,
+            Size: file.size,
+            ContentType,
+            Bucket: process.env.BUCKET_NAME,
+        };
+    }
+};
+
+export const createOne: Handler = async ({ body, set, request }: any) =>
 {
     try
     {
+        const res = await uploadOneFile(body.file, body.type, body.name);
+        if (!res)
+        {
+            return {
+                message: "failed to upload",
+            };
+        }
         const client = await commondbClientPromise;
         const col = client.db(dbName).collection(collectionName);
-        const dbRes = await col.insertOne(body as any);
-
+        const dbRes = await col.insertOne({ ...res, createdBy: request.user._id, createdAt: new Date() });
         set.status = 201;
-
         return {
             data: dbRes
         };
@@ -38,25 +61,6 @@ export const createOne: Handler = async ({ body, set }) =>
         };
     }
 };
-
-const uploadOneFile = async (file: any, fileType?: string, fileName?: string) =>
-{
-
-    const Key = `${new Date().valueOf()}_${fileName ? fileName : file.name}`;
-    const data = await file.arrayBuffer();
-    const ContentType = file.type ? file.type : fileType;
-    const res = await upload({ Key, Body: Buffer.from(data), ContentType });
-    if (res)
-    {
-        return {
-            Key,
-            Size: file.size,
-            ContentType,
-            Bucket: process.env.BUCKET_NAME,
-        };
-    }
-};
-
 
 export const createMany: Handler = async ({ body, set, request }: any) =>
 {
