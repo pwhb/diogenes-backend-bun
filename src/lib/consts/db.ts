@@ -2,7 +2,7 @@ export const dbName = process.env.DB_NAME || "test";
 
 export enum Collections
 {
-    avatars = "avatars",
+    assets = "assets",
     configs = "configs",
     users = "users",
     roles = "roles",

@@ -1,14 +1,16 @@
 import { exists, unlinkSync } from "fs";
-import { config } from "./consts";
+import { config, elements } from "./consts";
 
 
 
 
-function remove(path: string)
+export function remove(path: string)
 {
     try
     {
         unlinkSync(path);
+        console.log(`removed ${path}`);
+
     } catch (e)
     {
         console.error(`${path} does not exist`);
@@ -24,9 +26,13 @@ async function main()
             console.error("No collection name specified.\nPlease specify a collection name: bun run add users");
             return;
         }
-        remove(`${config.controllerDir}/${collectionName}.ts`);
-        remove(`${config.routerDir}/${collectionName}.ts`);
-        remove(`${config.restDir}/${collectionName}.rest`);
+
+        for (let el of elements)
+        {
+            const obj: any = (config as any)[el];
+            remove(`${obj.dir}/${collectionName}${obj.extension}`);
+        }
+
 
     } catch (error)
     {

@@ -1,18 +1,18 @@
 import Elysia, { t } from "elysia";
-import { createOne, deleteOne, getMany, getOne, replaceOne, updateOne } from "../controllers/avatars";
+import { createOne, deleteOne, getMany, getOne, replaceOne, updateOne } from "../controllers/assets";
 import { Collections } from "../lib/consts/db";
 import Tags from "../lib/consts/tags";
 import { setup } from "../lib/config/plugins";
 import { authenticate, authorize } from "../middlewares/auth";
 import { create, update } from "../middlewares/body";
-import avatarModel from "../models/avatars";
+import assetModel from "../models/assets";
 
-const hook = { detail: { tags: [Tags.avatars] } };
+const hook = { detail: { tags: [Tags.assets] } };
 
 
-const avatarRouter = new Elysia({ prefix: `/${Collections.avatars}` })
+const assetRouter = new Elysia({ prefix: `/${Collections.assets}` })
     .use(setup)
-    .use(avatarModel)
+    .use(assetModel)
     .post("/", createOne, {
         ...hook, beforeHandle: [authenticate, create]
     })
@@ -28,4 +28,4 @@ const avatarRouter = new Elysia({ prefix: `/${Collections.avatars}` })
         ...hook, beforeHandle: [authenticate, authorize]
     });
 
-export default avatarRouter;
+export default assetRouter;

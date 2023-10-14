@@ -4,7 +4,7 @@ enum Tags
     auth = "Auth",
     configs = "Configs",
     roles = "Roles",
-    avatars = "Avatars",
+    assets = "Assets",
     users = "Users",
     routes = "Routes",
     uploads = "Uploads",

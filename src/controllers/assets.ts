@@ -4,7 +4,7 @@ import clientPromise from "../lib/services/mongodb";
 import { Filter, ObjectId, Sort } from "mongodb";
 import { Key, Types, parseQuery, parseSort } from "../lib/query";
 
-const collectionName = Collections.avatars;
+const collectionName = Collections.assets;
 
 export const createOne: Handler = async ({ body, set }) =>
 {
@@ -38,7 +38,7 @@ export const createOne: Handler = async ({ body, set }) =>
     }
 };
 
-export const getOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/avatars/:id">
+export const getOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/assets/:id">
     = async ({ params, set }) =>
     {
         try
@@ -75,7 +75,15 @@ export const getMany: Handler = async ({ query, set }) =>
                 key: "q",
                 type: Types.Regex,
                 searchedKeys: ["name"]
-            }
+            },
+            {
+                key: "category",
+                type: Types.String
+            },
+            {
+                key: "type",
+                type: Types.String
+            },
         ];
         parseQuery({
             filter,
@@ -83,8 +91,6 @@ export const getMany: Handler = async ({ query, set }) =>
             query
         });
         const sort = parseSort(query);
-
-        console.log(filter);
 
         const client = await clientPromise;
         const col = client.db(dbName).collection(collectionName);
@@ -105,7 +111,7 @@ export const getMany: Handler = async ({ query, set }) =>
     }
 };
 
-export const updateOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/avatars/:id"> = async ({ params, body, set }) =>
+export const updateOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/assets/:id"> = async ({ params, body, set }) =>
 {
     try
     {
@@ -133,7 +139,7 @@ export const updateOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>,
     }
 };
 
-export const replaceOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/avatars/:id"> = async ({ params, body, set }) =>
+export const replaceOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/assets/:id"> = async ({ params, body, set }) =>
 {
     try
     {
@@ -158,7 +164,7 @@ export const replaceOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>
     }
 };
 
-export const deleteOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/avatars/:id"> = async ({ params, set }) =>
+export const deleteOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/assets/:id"> = async ({ params, set }) =>
 {
     try
     {

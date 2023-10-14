@@ -9,6 +9,7 @@ const userModel = new Elysia()
         user: t.Object({
             username: t.Optional(t.String()),
             avatar: t.Optional(t.String()),
+            wallpaper: t.Optional(t.String()),
             bio: t.Optional(t.String()),
             role: t.Optional(t.String()),
             active: t.Optional(t.Boolean()),
@@ -16,6 +17,7 @@ const userModel = new Elysia()
         self: t.Object({
             username: t.Optional(t.String()),
             avatar: t.Optional(t.String()),
+            wallpaper: t.Optional(t.String()),
             bio: t.Optional(t.String()),
         }),
         changePassword: t.Object({

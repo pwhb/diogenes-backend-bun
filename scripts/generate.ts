@@ -1,6 +1,6 @@
 import { BunFile } from "bun";
 import { parseTemplate } from "../src/lib/utils";
-import { config } from "./consts";
+import { config, elements } from "./consts";
 import { Collections, dbName } from "../src/lib/consts/db";
 import clientPromise from "../src/lib/services/mongodb";
 
@@ -10,7 +10,7 @@ async function generateFile(file: BunFile, collectionName: string, dir: string, 
     const text = await file.text();
     const singular = collectionName.slice(0, collectionName.length - 1);
     const parsed = parseTemplate(text, { collectionName, router: `${singular}Router`, singular });
-    const path = `${dir}/${collectionName}.${fileType}`;
+    const path = `${dir}/${collectionName}${fileType}`;
     await Bun.write(path, parsed);
     console.info(`${path} created successfully`);
 
@@ -18,17 +18,23 @@ async function generateFile(file: BunFile, collectionName: string, dir: string, 
 
 async function generateCodes(collectionName: string)
 {
-    const controllerTmp = Bun.file(`${config.prefix}/${config.controllerTmpFileName}`);
-    await generateFile(controllerTmp, collectionName, config.controllerDir);
 
-    const routerTmp = Bun.file(`${config.prefix}/${config.routerTmpFileName}`);
-    await generateFile(routerTmp, collectionName, config.routerDir);
+    for (let el of elements)
+    {
+        const tmp = Bun.file(`${config.prefix}/${(config as any)[el]["tmp"]}`);
+        await generateFile(tmp, collectionName, (config as any)[el]["dir"], (config as any)[el]["extension"]);
+    }
+    // const controllerTmp = Bun.file(`${config.prefix}/${config.controllerTmpFileName}`);
+    // await generateFile(controllerTmp, collectionName, config.controllerDir);
 
-    const modelTmp = Bun.file(`${config.prefix}/${config.modelTmpFileName}`);
-    await generateFile(modelTmp, collectionName, config.modelDir);
+    // const routerTmp = Bun.file(`${config.prefix}/${config.routerTmpFileName}`);
+    // await generateFile(routerTmp, collectionName, config.routerDir);
 
-    const restTmp = Bun.file(`${config.prefix}/${config.restTmpFileName}`);
-    await generateFile(restTmp, collectionName, config.restDir, "rest");
+    // const modelTmp = Bun.file(`${config.prefix}/${config.modelTmpFileName}`);
+    // await generateFile(modelTmp, collectionName, config.modelDir);
+
+    // const restTmp = Bun.file(`${config.prefix}/${config.restTmpFileName}`);
+    // await generateFile(restTmp, collectionName, config.restDir, "rest");
 }
 
 async function generateRoutes(collectionName: string)

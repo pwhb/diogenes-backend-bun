@@ -1,12 +1,12 @@
 import Elysia, { t } from "elysia";
 
-const avatarModel = new Elysia()
+const assetModel = new Elysia()
     .model({
-        avatar: t.Object({
+        asset: t.Object({
             path: t.Optional(t.String()),
             name: t.Optional(t.String()),
             active: t.Optional(t.Boolean()),
         })
     });
 
-export default avatarModel;
+export default assetModel;

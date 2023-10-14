@@ -2,7 +2,6 @@ import Elysia from "elysia";
 import { home } from "../controllers";
 import Tags from "../lib/consts/tags";
 import authRouter from "./auth";
-import avatarRouter from "./avatars";
 import roleRouter from "./roles";
 import userRouter from "./users";
 import configRouter from "./configs";
@@ -15,6 +14,7 @@ import uploadRouter from "./uploads";
 import swaggerConf from "../lib/config/swagger";
 import permissionRouter from "./permissions";
 import roomRouter from "./rooms";
+import assetRouter from "./assets";
 
 const hook = { detail: { tags: [Tags.app] } };
 
@@ -25,7 +25,7 @@ const router = new Elysia()
     .get("/", home, hook)
     .use(authRouter)
     .group("/api/v1", app => app
-        .use(avatarRouter)
+        .use(assetRouter)
         .use(roleRouter)
         .use(permissionRouter)
         .use(userRouter)
