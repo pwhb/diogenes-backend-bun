@@ -84,6 +84,10 @@ export const getMany: Handler = async ({ query, set }) =>
                 key: "type",
                 type: Types.String
             },
+            {
+                key: "active",
+                type: Types.Boolean
+            },
         ];
         parseQuery({
             filter,

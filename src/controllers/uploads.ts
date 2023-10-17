@@ -22,6 +22,7 @@ const uploadOneFile = async (file: any, fileType?: string, fileName?: string) =>
             Size: file.size,
             ContentType,
             Bucket: process.env.BUCKET_NAME,
+            originalName: fileName ? fileName : file.name
         };
     }
 };
@@ -208,6 +209,11 @@ export const getMany: Handler = async ({ query, set }) =>
                 key: "q",
                 type: Types.Regex,
                 searchedKeys: ["Key", "ContentType"]
+            },
+            {
+                key: "type",
+                type: Types.Regex,
+                searchedKeys: ["ContentType"]
             }
         ];
         parseQuery({
