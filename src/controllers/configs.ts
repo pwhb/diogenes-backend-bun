@@ -3,6 +3,7 @@ import { dbName, Collections } from "../lib/consts/db";
 import clientPromise from "../lib/services/mongodb";
 import { ObjectId } from "mongodb";
 import { Key, Types, parseQuery, parseSort } from "../lib/query";
+import { fetchViaRedis } from "../lib/services/redis";
 
 const collectionName = Collections.configs;
 
@@ -44,9 +45,12 @@ export const getOneByName: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {
         try
         {
             const { name } = context.params;
-            const client = await clientPromise;
-            const col = client.db(dbName).collection(collectionName);
-            const dbRes = await col.findOne({ name: name });
+            const dbRes = await fetchViaRedis(`configs:${name}`, async () =>
+            {
+                const client = await clientPromise;
+                const col = client.db(dbName).collection(collectionName);
+                return await col.findOne({ name: name });
+            });
             return {
                 data: dbRes
             };

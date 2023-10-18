@@ -17,7 +17,8 @@
     "@elysiajs/jwt": "^0.7.0",
     "@elysiajs/swagger": "^0.7.3",
     "elysia": "latest",
-    "mongodb": "^6.1.0"
+    "mongodb": "^6.1.0",
+    "redis": "^4.6.10"
   },
   "devDependencies": {
     "bun-types": "latest"
