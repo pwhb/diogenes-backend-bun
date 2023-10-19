@@ -45,12 +45,9 @@ export const getOneByName: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {
         try
         {
             const { name } = context.params;
-            const dbRes = await fetchViaRedis(`configs:${name}`, async () =>
-            {
-                const client = await clientPromise;
-                const col = client.db(dbName).collection(collectionName);
-                return await col.findOne({ name: name });
-            });
+            const client = await clientPromise;
+            const col = client.db(dbName).collection(collectionName);
+            const dbRes = await col.findOne({ name: name });
             return {
                 data: dbRes
             };
