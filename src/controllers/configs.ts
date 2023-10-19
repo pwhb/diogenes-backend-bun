@@ -3,7 +3,6 @@ import { dbName, Collections } from "../lib/consts/db";
 import clientPromise from "../lib/services/mongodb";
 import { ObjectId } from "mongodb";
 import { Key, Types, parseQuery, parseSort } from "../lib/query";
-import { fetchViaRedis } from "../lib/services/redis";
 
 const collectionName = Collections.configs;
 
