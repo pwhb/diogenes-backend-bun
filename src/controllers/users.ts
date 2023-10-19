@@ -51,7 +51,11 @@ export const getOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}
             const { id } = context.params;
             const client = await clientPromise;
             const col = client.db(dbName).collection(collectionName);
-            const dbRes = await col.findOne({ _id: new ObjectId(id) });
+            const dbRes = await col.findOne({ _id: new ObjectId(id) }, {
+                projection: {
+                    password: 0
+                }
+            });
             return {
                 data: dbRes
             };
@@ -121,7 +125,6 @@ export const updateSelf: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>
 {
     try
     {
-
         const id = request.user._id;
         const update = { ...body as any };
 

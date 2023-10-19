@@ -1,5 +1,5 @@
 import Elysia, { t } from "elysia";
-import { createOne, deleteOne, getMany, getOne, replaceOne, updateOne } from "../controllers/rooms";
+import { createOne, deleteOne, getMany, getManyByToken, getOne, getOneByToken, replaceOne, updateOne } from "../controllers/rooms";
 import { Collections } from "../lib/consts/db";
 import Tags from "../lib/consts/tags";
 import { setup } from "../lib/config/plugins";
@@ -18,6 +18,14 @@ const roomRouter = new Elysia({ prefix: `/${Collections.rooms}` })
         body: 'room'
     })
     .get("/", getMany, hook)
+    .get("/getbyToken", getManyByToken, {
+        ...hook,
+        beforeHandle: [authenticate],
+    })
+    .get("/:id/getbyToken", getOneByToken, {
+        ...hook,
+        beforeHandle: [authenticate],
+    })
     .get("/:id", getOne, hook)
     .patch("/:id", updateOne, {
         ...hook,

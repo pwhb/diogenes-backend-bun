@@ -1,15 +1,14 @@
-import { Collections, dbName } from "../src/lib/consts/db";
-import clientPromise from "../src/lib/services/mongodb";
+import { Collections, dbName } from "../../src/lib/consts/db";
+import clientPromise from "../../src/lib/services/mongodb";
 
 async function seed()
 {
     const client = await clientPromise;
-    const col = client.db(dbName).collection(Collections.routes);
+    const col = client.db(dbName).collection(Collections.followings);
     const dbRes = await col.createIndex(
         {
-            "path": 1,
-            "entity": 1,
-            "method": 1
+            follower: 1,
+            followed: 1,
         },
         { unique: true }
     );

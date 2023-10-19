@@ -1,7 +1,7 @@
 import { Handler, InputSchema, MergeSchema, UnwrapRoute } from "elysia";
 import { dbName, Collections } from "../lib/consts/db";
 import clientPromise from "../lib/services/mongodb";
-import { Filter, ObjectId, Sort } from "mongodb";
+import { AggregateOptions, Filter, ObjectId, Sort } from "mongodb";
 import { Key, Types, parseQuery, parseSort } from "../lib/query";
 
 const collectionName = Collections.rooms;
@@ -60,6 +60,60 @@ export const getOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}
         }
     };
 
+export const getOneByToken: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/rooms/:id/getbyToken">
+    = async ({ params, set, request }: any) =>
+    {
+        try
+        {
+            const { id } = params;
+            const client = await clientPromise;
+            const col = client.db(dbName).collection(collectionName);
+            const docs = await col.aggregate([
+                {
+                    $match: {
+                        _id: new ObjectId(id)
+                    },
+                },
+                {
+                    $lookup: {
+                        from: Collections.users,
+                        localField: "members",
+                        foreignField: "_id",
+                        pipeline: [
+                            {
+                                $match: {
+                                    _id: { $ne: request.user._id }
+                                }
+                            },
+                            {
+                                $project: {
+                                    password: 0,
+                                    createdAt: 0,
+                                    updatedAt: 0,
+                                    updatedBy: 0
+                                }
+                            }
+                        ],
+                        as: "members"
+                    }
+                },
+                {
+                    $limit: 1
+                }
+            ]).toArray();
+            return {
+                data: docs[0]
+            };
+        } catch (error)
+        {
+            console.error(error);
+            set.status = 500;
+            return {
+                error: error
+            };
+        }
+    };
+
 export const getMany: Handler = async ({ query, set }) =>
 {
     try
@@ -68,7 +122,7 @@ export const getMany: Handler = async ({ query, set }) =>
 
         limit = parseInt(limit) || 20;
         page = parseInt(page) || 0;
-        
+
         const filter = {};
         const keys: Key[] = [
             {
@@ -92,6 +146,79 @@ export const getMany: Handler = async ({ query, set }) =>
         const client = await clientPromise;
         const col = client.db(dbName).collection(collectionName);
         const docs = await col.find(filter, { skip: limit * page, limit: limit, sort: sort }).toArray();
+        const total = await col.countDocuments(filter);
+
+        return {
+            total: total,
+            data: docs,
+        };
+    } catch (error)
+    {
+        console.error(error);
+        set.status = 500;
+        return {
+            error: error
+        };
+    }
+};
+
+export const getManyByToken: Handler = async ({ query, set, request }: any) =>
+{
+    try
+    {
+        let { limit, page } = query as any;
+
+        limit = parseInt(limit) || 20;
+        page = parseInt(page) || 0;
+
+
+        const filter = {
+            members: request.user._id
+        };
+
+        const sort: Sort = {
+            updatedAt: -1
+        };
+
+        const client = await clientPromise;
+        const col = client.db(dbName).collection(collectionName);
+        const docs = await col.aggregate([
+            {
+                $match: filter,
+            },
+            {
+                $lookup: {
+                    from: Collections.users,
+                    localField: "members",
+                    foreignField: "_id",
+                    pipeline: [
+                        {
+                            $match: {
+                                _id: { $ne: request.user._id }
+                            }
+                        },
+                        {
+                            $project: {
+                                password: 0,
+                                createdAt: 0,
+                                updatedAt: 0,
+                                updatedBy: 0
+                            }
+                        }
+                    ],
+                    as: "members"
+                }
+            },
+            {
+                $skip: limit * page
+            },
+            {
+                $limit: limit
+            },
+            {
+                $sort: sort
+            }
+        ]).toArray();
         const total = await col.countDocuments(filter);
 
         return {

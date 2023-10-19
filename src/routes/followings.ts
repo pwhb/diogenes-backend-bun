@@ -1,5 +1,5 @@
 import Elysia, { t } from "elysia";
-import { createOne, deleteOne, getMany, getOne, replaceOne, updateOne } from "../controllers/followings";
+import { createOne, deleteOne, getMany, getOne, replaceOne, unfollowOne, updateOne } from "../controllers/followings";
 import { Collections } from "../lib/consts/db";
 import Tags from "../lib/consts/tags";
 import { setup } from "../lib/config/plugins";
@@ -14,7 +14,12 @@ const followingRouter = new Elysia({ prefix: `/${Collections.followings}` })
     .use(followingModel)
     .post("/", createOne, {
         ...hook,
-        beforeHandle: [authenticate, create],
+        beforeHandle: [authenticate],
+        body: 'following'
+    })
+    .post("/unfollow", unfollowOne, {
+        ...hook,
+        beforeHandle: [authenticate],
         body: 'following'
     })
     .get("/", getMany, hook)
