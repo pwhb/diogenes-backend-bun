@@ -1,10 +1,10 @@
 import { Handler, InputSchema, MergeSchema, UnwrapRoute } from "elysia";
 import { dbName, Collections } from "../lib/consts/db";
 import clientPromise from "../lib/services/mongodb";
-import { AggregateOptions, Filter, ObjectId, Sort } from "mongodb";
+import { Filter, ObjectId, Sort } from "mongodb";
 import { Key, Types, parseQuery, parseSort } from "../lib/query";
 
-const collectionName = Collections.rooms;
+const collectionName = Collections.messages;
 
 export const createOne: Handler = async ({ body, set }) =>
 {
@@ -38,7 +38,7 @@ export const createOne: Handler = async ({ body, set }) =>
     }
 };
 
-export const getOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/rooms/:id">
+export const getOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/messages/:id">
     = async ({ params, set }) =>
     {
         try
@@ -49,67 +49,6 @@ export const getOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}
             const dbRes = await col.findOne({ _id: new ObjectId(id) });
             return {
                 data: dbRes
-            };
-        } catch (error)
-        {
-            console.error(error);
-            set.status = 500;
-            return {
-                error: error
-            };
-        }
-    };
-
-export const getOneByToken: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/rooms/:id/getbyToken">
-    = async ({ params, set, request }: any) =>
-    {
-        try
-        {
-            const { id } = params;
-            const client = await clientPromise;
-            const col = client.db(dbName).collection(collectionName);
-            const docs = await col.aggregate([
-                {
-                    $match: {
-                        _id: new ObjectId(id),
-                        members: request.user._id
-                    },
-                },
-                {
-                    $lookup: {
-                        from: Collections.users,
-                        localField: "members",
-                        foreignField: "_id",
-                        pipeline: [
-                            {
-                                $match: {
-                                    _id: { $ne: request.user._id }
-                                }
-                            },
-                            {
-                                $project: {
-                                    password: 0,
-                                    createdAt: 0,
-                                    updatedAt: 0,
-                                    updatedBy: 0
-                                }
-                            }
-                        ],
-                        as: "members"
-                    }
-                },
-                {
-                    $limit: 1
-                }
-            ]).toArray();
-
-            if (!docs)
-            {
-                set.status = 401;
-                return null;
-            }
-            return {
-                data: docs[0]
             };
         } catch (error)
         {
@@ -173,14 +112,14 @@ export const getManyByToken: Handler = async ({ query, set, request }: any) =>
 {
     try
     {
-        let { limit, page } = query as any;
+        let { limit, page, roomId } = query as any;
 
         limit = parseInt(limit) || 20;
         page = parseInt(page) || 0;
 
 
         const filter = {
-            members: request.user._id
+            roomId: new ObjectId(roomId)
         };
 
         const sort: Sort = {
@@ -188,33 +127,20 @@ export const getManyByToken: Handler = async ({ query, set, request }: any) =>
         };
 
         const client = await clientPromise;
-        const col = client.db(dbName).collection(collectionName);
+        const db = client.db(dbName);
+
+        const room = db.collection(Collections.rooms).findOne({ _id: new ObjectId(roomId), members: request.user._id });
+
+        if (!room)
+        {
+            set.status = 401;
+            return null;
+        }
+
+        const col = db.collection(collectionName);
         const docs = await col.aggregate([
             {
                 $match: filter,
-            },
-            {
-                $lookup: {
-                    from: Collections.users,
-                    localField: "members",
-                    foreignField: "_id",
-                    pipeline: [
-                        {
-                            $match: {
-                                _id: { $ne: request.user._id }
-                            }
-                        },
-                        {
-                            $project: {
-                                password: 0,
-                                createdAt: 0,
-                                updatedAt: 0,
-                                updatedBy: 0
-                            }
-                        }
-                    ],
-                    as: "members"
-                }
             },
             {
                 $skip: limit * page
@@ -242,7 +168,7 @@ export const getManyByToken: Handler = async ({ query, set, request }: any) =>
     }
 };
 
-export const updateOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/rooms/:id"> = async ({ params, body, set }) =>
+export const updateOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/messages/:id"> = async ({ params, body, set }) =>
 {
     try
     {
@@ -270,7 +196,7 @@ export const updateOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>,
     }
 };
 
-export const replaceOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/rooms/:id"> = async ({ params, body, set }) =>
+export const replaceOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/messages/:id"> = async ({ params, body, set }) =>
 {
     try
     {
@@ -295,7 +221,7 @@ export const replaceOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>
     }
 };
 
-export const deleteOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/rooms/:id"> = async ({ params, set }) =>
+export const deleteOne: Handler<MergeSchema<UnwrapRoute<InputSchema<never>, {}>, {}>, { request: {}; store: {}; }, "/messages/:id"> = async ({ params, set }) =>
 {
     try
     {

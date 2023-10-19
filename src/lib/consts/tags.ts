@@ -11,6 +11,7 @@ enum Tags
     permissions = "Permissions",
     rooms = "Rooms",
     followings = "Followings",
+    messages = "Messages",
 }
 
 export default Tags;
